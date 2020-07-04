@@ -217,7 +217,7 @@ do
 		echo -e "MANIFESTVERSIONMINOR\t1" >> ${manid}
 		echo -e "NHID\t${chid}\n" >> ${manid}
 		echo -e "NAME\t${filename}" >> ${manid}
-		cat ${manid}
+		[ ${debug} -eq 1 ] && cat ${manid}
 
 		####################
 		# Create the NHID with the name and the CHID of the 
