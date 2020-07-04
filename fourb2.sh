@@ -13,6 +13,11 @@ then
 		dir=${hashid:0:2}
 		subdir=${hashid:2:2}
 		dirpath=${HASHES}/${dir}/${subdir}
+		if [ -z "${dirpath}" ]
+		then
+			echo $FUNCNAME $LINENNO Empty directory
+			exit -1
+		fi
 		mkdir -p ${dirpath}
 		echo ${dirpath}
 	}
@@ -59,7 +64,7 @@ manifest[11]="LASTCHANGE\t%z\n"
 manifestfmt=""
 for i in $(seq 1 11)
 do
-	Manifeststring="${manifestfmt}${manifest[$i]}"
+	manifestfmt="${manifestfmt}${manifest[$i]}"
 done
 
 echo $(date '+%T')
@@ -105,21 +110,25 @@ do
 			prevmnid=${prevmnidhash:0:127}
 			p_mnid=$(hashdirpath ${prevmnid})
 			pmanid=${p_mnid}/${prevmnid}
-
+			prev_objid=$(awk -F'\t' '/OBJECTVERSION/{print $2}' < ${manid})
+			((object_version=prev_objid + 1))
 			mv ${manid} ${pmanid}
 			echo -e "PREVMANIFEST\t${prevmnid}" >${manid}
 		else
-			echo -e "PREVMANIVFEST\t0" > ${manid}
+			echo -e "PREVMANIFEST\t0" > ${manid}
+			object_version=0
 		fi
+		echo -e "OBJECTVERSION\t${object_version}" >> ${manid}
 		echo -e "MANIFESTVERSIONMAJOR\t0" >> ${manid}
 		echo -e "MANIFESTVERSIONMINOR\t1" >> ${manid}
-		stat --print="${manifestfmt}" "${filename}" >> ${manid}
+		echo -e "NHID\t${chid}\n" >> ${manid}
+		echo -e "NAME\t${filename}" >> ${manid}
+		cat ${manid}
 
-		echo -e "CHID\t${chid}\n" >> ${p_nhid}/${nhid}.NHID
+		echo -e "NHID\t${chid}\n" >> ${p_nhid}/${nhid}.NHID
 		echo -e "NAME\t${filename}" >> ${p_nhid}/${nhid}.NHID
 
 		p_chid=$(hashdirpath ${chid})
-		mkdir -p ${chidhashdir}
 		echo -e "NAME\t${filename}" >> ${p_chid}/${chid}.CHID
 
 
