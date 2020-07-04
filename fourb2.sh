@@ -3,7 +3,7 @@ HASHES=/hashes
 HASHCNT=0
 TMPDIR=/tmp/${HASHES}.$$.dir
 re_hexnumber='^[0-9a-f][0-9a-f]*$'
-if [-z "${__func_writehash}" ]
+if [ -z "${__func_writehash}" ]
 then
 	export __func_hashdirpath=1
 
@@ -62,7 +62,6 @@ do
 	Manifeststring="${manifestfmt}${manifest[$i]}"
 done
 
-declare -A allhashes
 echo $(date '+%T')
 while read -r dirname
 do
@@ -84,7 +83,6 @@ do
 		fi
 		chid=${hashline:0:127}
 		filename=${hashline:130}
-		allhashes[$hashonly]="$filename"
 		if [ ! -f "${filename}" ]
 		then
 			echo "filename=${filename} is not a file"
