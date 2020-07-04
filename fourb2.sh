@@ -113,6 +113,8 @@ do
 		else
 			echo -e "PREVMANIVFEST\t0" > ${manid}
 		fi
+		echo -e "MANIFESTVERSIONMAJOR\t0" >> ${manid}
+		echo -e "MANIFESTVERSIONMINOR\t1" >> ${manid}
 		stat --print="${manifestfmt}" "${filename}" >> ${manid}
 
 		echo -e "CHID\t${chid}\n" >> ${p_nhid}/${nhid}.NHID
