@@ -1,8 +1,14 @@
 #!/bin/bash
-HASHES=/hashes
-HASHCNT=0
-TMPDIR=/tmp/${HASHES}.$$.dir
-re_hexnumber='^[0-9a-f][0-9a-f]*$'
+USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
+\t<directory>\tThe directory that will be converted to a YesFS\n
+\t\tfile system prototype using b2sum cryptographic hash.\n
+\t<rootpath>\tThe directory where the YesFS file system will be\n
+\t\tplaced.  Default is /hashes. Requests SU privileges to create\n
+\t-h\t\tPrint this help information\n
+\t-d\t\tPrint diagnostic information (dump manifests as created)\n
+\t-v\t\tPrints a '.' for every 100 files processed.  Default is on.\n
+\t\t\tToggles the default.  Prints a timestamp every 7000 files.\n
+"
 if [ -z "${__func_writehash}" ]
 then
 	export __func_hashdirpath=1
@@ -24,32 +30,78 @@ then
 	export hashdirpath
 fi # if [-z "${__func_writehash}" ]
 
+optionargs="hdv"
+NUMARGS=1
+debug=0
+verbose=1
+yesfsdir=/hashes
+FILECOUNT=0
+re_hexnumber='^[0-9a-f][0-9a-f]*$'
+
+while getopts ${optionargs} name
+do
+	case ${name} in
+	h)
+		echo -e ${USAGE}
+		exit 0
+		;;
+	d)
+		debug=1
+		;;
+	v)
+		if [ ${verbose} -eq 1 ]
+		then
+			verbose=0
+		fi
+		;;
+	\?)
+		echo "${0##*/}: invalid option: -${OPTARG}"
+		echo -e "${USAGE}"
+		exit 0
+		;;
+	esac
+done
+shift "$(($OPTIND - 1))"
+[ $# -lt $NUMARGS ] && { echo -e ${USAGE}; exit -1; }
+topdir=$1
+shift
+if [ $# -ge 0 ]
+then
+	yesfsdir=$1
+fi
+TMPDIR=/tmp/${yesfsdir}.$$.dir
 mkdir -p ${TMPDIR}
 if [ ! -d ${HASHES} ]
 then
 	sudo mkdir -p ${HASHES}
 	sudo chmod 777 ${HASHES}
 fi
-if [ $# -lt 1 ]
-then
-	echo $LINENO working on "$1"
-	exit 0
-fi
 DIRLIST=${TMPDIR}/directories
-if [ ! -d "$1" ]
+if [ ! -d "${topdir}" ]
 then
-	echo "Not a directory $1"
+	echo "Not a directory ${topdir}"
 	exit 0
 fi
-find "$1" -type d -a \( -name hashes -o -name tmp \) -prune \
-	-o -type d -print  > ${DIRLIST}
-cat ${DIRLIST}
-ls -l ${DIRLIST}
-wc -l ${DIRLIST}
-# split -C 2048 ${DIRLIST} ${TMPDIR}/dirfile
-# ls -l ${TMPDIR}/dirfile*
-# wc -l ${TMPDIR}/dirfile*
 
+####################
+# Find all of the directories in the current path and put the list
+# of directories in a file.  We will process the files one directory
+# at a time.
+####################
+find "${topdir}" -type d -a \( -name hashes -o -name tmp \) -prune \
+	-o -type d -print  > ${DIRLIST}
+
+if [ ${debug} -eq 1 ]
+then
+	cat ${DIRLIST}
+	ls -l ${DIRLIST}
+	wc -l ${DIRLIST}
+fi
+
+####################
+# These are the pieces of information that come from stat
+# to add to the Manifest.  See man 1 stat
+####################
 manifest[1]="ACCESS\t%a\n"
 manifest[2]="DEVICE\t%D\n"
 manifest[3]="FILETYPE\t%F\n"
@@ -67,45 +119,76 @@ do
 	manifestfmt="${manifestfmt}${manifest[$i]}"
 done
 
-echo $(date '+%T')
+[ ${verbose} -eq 1 ] && echo $(date '+%T')
+
 while read -r dirname
 do
-	#find "$dirname" -maxdepth 1 -type f  > ${TMPDIR}/thislist
-	# ls -l ${TMPDIR}/thislist
-	# echo "Number of Files in ${dirname} is $(wc -l ${TMPDIR}/thislist)"
 	if [ ! -d "$dirname" ]
 	then
 		echo "${0##*/} $LINENO dirname=${dirname} is not a directory"
 		exit -1
 	fi
+
 	b2sum "$dirname"/* 2> /dev/null >/${TMPDIR}/thislist
-	# cat ${TMPDIR}/thislist
+
 	while read -r hashline
 	do
+		####################
+		# A line beginning with "Failed" is a directory or
+		# other special file.  Ignore
+		####################
 		if [ "${hashline:0:5}" == "Failed" ]
 		then
 			continue
 		fi
+
+		####################	
+		# Get the content hash ID of the file: CHID
+		# and the filename
+		####################	
 		chid=${hashline:0:127}
 		filename=${hashline:130}
+
 		if [ ! -f "${filename}" ]
 		then
 			echo "filename=${filename} is not a file"
 			exit 0
 		fi
-		((HASHCNT++))
-		# b2hash=$(b2sum "${filename}" 2>/dev/null)
-		# echo "b2hash of ${filename}=${b2hash}"
-		# hashonly=$(echo ${b2hash} | cut -d ' ' -f 1)
 
+		((FILECOUNT++))
+
+		####################	
+		# Get the name hash ID of the file: NHID
+		####################	
 		namehash=$(echo ${filename} | b2sum)
 		nhid=${namehash:0:127}
+
+		####################	
+		# See hashdirpath to see how the directories
+		# are setup as prefixes for the hash names
+		# Set the Path for the NHID
+		# The Manifest has the suffix .MANIFEST
+		# The object containing the file name has the suffix .NHID
+		####################
 		p_nhid=$(hashdirpath ${nhid})
-		mnid=${nhid}.MANIFEST
-		manid=${p_nhid}/${mnid}
+		manid=${p_nhid}/${mnid}.MANIFEST
 		fullnhid=${p_nhid}/${nhid}.NHID
+
+		####################
+		# If the NHID already exists it means we have a prior
+		# version of this name.
+		####################
 		if [ -r ${fullnhid} ]
 		then
+
+			####################
+			# A prior NHID means a prior MANIFEST  a safety
+			# check here would be a good idea.
+			# Take the hash of the prior manifest.  This
+			# hash will be placed in the new MANIFEST.
+			# Retrieve the version number of the object
+			# from the prior manifest
+			####################
 			prevmnidhash=$(b2sum ${manid})
 			prevmnid=${prevmnidhash:0:127}
 			p_mnid=$(hashdirpath ${prevmnid})
@@ -115,9 +198,20 @@ do
 			mv ${manid} ${pmanid}
 			echo -e "PREVMANIFEST\t${prevmnid}" >${manid}
 		else
+
+			####################
+			# First Manifest for the object, set the 
+			# PREVMANIFEST to NULL and the object version
+			# to Zero
+			####################
 			echo -e "PREVMANIFEST\t0" > ${manid}
 			object_version=0
 		fi
+
+		####################
+		# Fill the Manifest.  This is currently missing the 
+		# chunks for the file contents which belongs here.
+		####################
 		echo -e "OBJECTVERSION\t${object_version}" >> ${manid}
 		echo -e "MANIFESTVERSIONMAJOR\t0" >> ${manid}
 		echo -e "MANIFESTVERSIONMINOR\t1" >> ${manid}
@@ -125,17 +219,33 @@ do
 		echo -e "NAME\t${filename}" >> ${manid}
 		cat ${manid}
 
+		####################
+		# Create the NHID with the name and the CHID of the 
+		# object contents.
+		####################
 		echo -e "NHID\t${chid}\n" >> ${p_nhid}/${nhid}.NHID
 		echo -e "NAME\t${filename}" >> ${p_nhid}/${nhid}.NHID
 
+		####################
+		# Create a chunk ID for the content chunk that points
+		# pack to the name.  This is not correct as instantiated
+		# and probably should be dropped as redundant.  Multiple
+		# identical files will successively wipe this out.
+		# An alternate implementation would be to create a 
+		# linked list like the manifests.
+		####################
 		p_chid=$(hashdirpath ${chid})
 		echo -e "NAME\t${filename}" >> ${p_chid}/${chid}.CHID
 
 
-		[ $(expr ${HASHCNT} % 100) -eq 0 ] && echo -n "."
-		[ $(expr ${HASHCNT} % 7000) -eq 0 ] && { \
-			echo ""; echo "$(date '+%T') ${HASHCNT}"
-		}
+		[[ ${verbose} -eq 1 && \
+			$(expr ${FILECOUNT} % 100) -eq 0 ]] && \
+			echo -n "."
+		[[ ${verbose} -eq 1 && \
+			$(expr ${FILECOUNT} % 7000) -eq 0 ]] && \
+			{ \
+				echo ""; echo "$(date '+%T') ${FILECOUNT}"
+			}
 	done < ${TMPDIR}/thislist
 	wait
 done  < ${DIRLIST}
