@@ -1,13 +1,17 @@
 #!/bin/bash
 USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
 \t<directory>\tThe directory that will be converted to a YesFS\n
-\t\tfile system prototype using b2sum cryptographic hash.\n
+\t\t\tfile system prototype using b2sum cryptographic hash.\n
 \t<rootpath>\tThe directory where the YesFS file system will be\n
-\t\tplaced.  Default is /hashes. Requests SU privileges to create\n
-\t-h\t\tPrint this help information\n
-\t-d\t\tPrint diagnostic information (dump manifests as created)\n
-\t-v\t\tPrints a '.' for every 100 files processed.  Default is on.\n
-\t\t\tToggles the default.  Prints a timestamp every 7000 files.\n
+\t\t\tplaced.  Default is /hashes. Requests SU privileges\n
+\t\t\tto create.\n
+\t-h\t\tPrint this help information.\n
+\t-d\t\tPrint diagnostic information\n
+\t\t\t(dump manifests as created).\n
+\t-v\t\tPrints a '.' for every 100 files processed.\n
+\t\t\tDefault is on.\n
+\t\t\tToggles the default.  Prints a timestamp\n
+\t\t\tevery 7000 files.\n
 "
 if [ -z "${__func_writehash}" ]
 then
