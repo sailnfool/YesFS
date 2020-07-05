@@ -85,8 +85,9 @@ then
 fi
 TMPDIR=/tmp/${yesfsdir}.$$.dir
 mkdir -p ${TMPDIR}
-if [ ! -d ${HASHES} ]
+if [ ! -d ${yesfsdir} ]
 then
+	HASHES=${yesfsdir}/.hash
 	sudo mkdir -p ${HASHES}
 	sudo chmod 777 ${HASHES}
 fi
@@ -134,7 +135,6 @@ do
 done
 
 [ ${verbose} -eq 1 ] && echo $(date '+%T')
-
 while read -r dirname
 do
 	if [ ! -d "$dirname" ]
@@ -160,7 +160,7 @@ do
 		# Get the content hash ID of the file: CHID
 		# and the filename
 		####################	
-		chid=${hashline:0:127}
+		chid=${hashline:0:128}
 		filename=${hashline:130}
 
 		if [ ! -f "${filename}" ]
@@ -175,7 +175,9 @@ do
 		# Get the name hash ID of the file: NHID
 		####################	
 		namehash=$(echo ${filename} | b2sum)
-		nhid=${namehash:0:127}
+		nhid=${namehash:0:128}
+
+
 
 		####################	
 		# See hashdirpath to see how the directories
@@ -185,9 +187,11 @@ do
 		# The object containing the file name has the suffix .NHID
 		####################
 		p_nhid=$(hashdirpath ${nhid})
-		manid=${p_nhid}/${mnid}.MANIFEST
+		manid=${p_nhid}/${nhid}.MANIFEST
 		fullnhid=${p_nhid}/${nhid}.NHID
-
+		ldir="${filename%/*}"
+		mkdir -p "${yesfsdir}/${ldir}"
+		echo "${p_nhid}/${nhid}" >> "${yesfsdir}/${ldir}/${filename}"
 		####################
 		# If the NHID already exists it means we have a prior
 		# version of this name.
@@ -204,7 +208,7 @@ do
 			# from the prior manifest
 			####################
 			prevmnidhash=$(b2sum ${manid})
-			prevmnid=${prevmnidhash:0:127}
+			prevmnid=${prevmnidhash:0:128}
 			p_mnid=$(hashdirpath ${prevmnid})
 			pmanid=${p_mnid}/${prevmnid}
 			prev_objid=$(awk -F'\t' '/OBJECTVERSION/{print $2}' < ${manid})
