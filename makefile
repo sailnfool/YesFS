@@ -4,7 +4,7 @@ PREFIX?=$(HOME)
 	@rm -f $@
 	cp $< $@
 INSTALL = getb2sum \
-	  genb2 oneb2 twob2 twob2a threeb2 fourb2
+	  genb2 oneb2 twob2 twob2a threeb2 fourb2 fiveb2
 
 EXECDIR := $(PREFIX)/bin
 
