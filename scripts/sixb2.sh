@@ -1,4 +1,6 @@
 #!/bin/bash
+source yfunc.hashdirpath
+source func.errecho
 USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
 \t<directory>\tThe directory that will be converted to a YesFS\n
 \t\t\tfile system prototype using b2sum cryptographic hash.\n
@@ -23,26 +25,6 @@ USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
 \t\t\tToggles the default.  Prints a timestamp\n
 \t\t\tevery 7000 files.\n
 "
-if [ -z "${__func_writehash}" ]
-then
-	export __func_hashdirpath=1
-
-	function hashdirpath {
-		hashid=$1
-
-		dir=${hashid:0:2}
-		subdir=${hashid:2:2}
-		dirpath=${HASHES}/${dir}/${subdir}
-		if [ -z "${dirpath}" ]
-		then
-			echo $FUNCNAME $LINENNO Empty directory
-			exit -1
-		fi
-		mkdir -p ${dirpath}
-		echo ${dirpath}
-	}
-	export hashdirpath
-fi # if [-z "${__func_writehash}" ]
 
 optionargs="hdv"
 NUMARGS=1
@@ -92,6 +74,7 @@ then
 	sudo chmod 777 ${HASHES}
 fi
 DIRLIST=${TMPDIR}/directories
+CHUNKLOG=${yesfsdir}/.chunklog
 if [ ! -d "${topdir}" ]
 then
 	echo "Not a directory ${topdir}"
@@ -161,8 +144,10 @@ do
 		# and the filename
 		####################	
 		chid=${hashline:0:128}
-		filename=${hashline:130}
+		p_chid=$(hashdirpath ${chid})
+		f_chid="${p_chid}/${chid}"
 
+		filename=${hashline:130}
 		if [ ! -f "${filename}" ]
 		then
 			echo "filename=${filename} is not a file"
@@ -177,7 +162,69 @@ do
 		namehash=$(echo ${filename} | b2sum)
 		nhid=${namehash:0:128}
 
+		####################	
+		# This timestamp will create a new time stamp each
+		# time it is referenced.  It creates two fields:
+		# YYYYMMDD_HHMMSS
+		# seconds_since_epoch.current_nanoseconds
+		#
+		# By removing the '\' at the beginning of the string
+		# this would become a single timestamp for all elements
+		# of the object creation, which may be desirable.
+		####################	
+		timestamp="\$(date -u '+%Y%m%d_%T\t%s.%N')"
 
+		####################	
+		# This next step should be the process that breaks
+		# the file into multiple chunks and ties each of those
+		# chunks back to the nhid as they are created, building
+		# the basis for the chunk list that is at the end of
+		# the manifest for the object.  For now we simplify
+		# by turning the object into a single chunk.
+		####################	
+		
+		CHUNKID="${f_chid}.CHID"
+		METAID="${f_chid}.METACHUNK"
+		METAACCESSID="${f_chid}.METACHUNKACCESS"
+		if [ -f "${CHUNKID}" ]
+			echo -e "${chid}\tCHID\tB2\tACCESS\t${timestamp}" >> ${CHUNKLOG}
+			if [ ! -f ${METAACCESSID} ]
+			then
+				stderrecho "${METAID} not found"
+				exit 1
+			fi
+			while read metaline
+			do
+				ATR_string="ACCESS_TIME_RECORDS"
+				if [ "${metaline:0:${#ATR_string}}" = "${ATR_string}" ]
+				then
+					meta_access_id="${metaline:$((${#ATR_string}+1))}"
+				fi
+			done < ${METAACCESSID}
+			meta_accessid[0]="PREVIOUS_ACCESS_METACHUNKACCESS\t${meta_access_id}"
+			meta_accessid[1]="TIME\t${timestamp}"
+			meta_accessid[2]="USERID\t$(uid -u)"
+			meta_accessid[3]="GROUPID\t$(uid -g)"
+			
+		else
+			cp "${filename}" ${p_chid}/${chid}.CHID
+			echo -e "${chid}\tCHID\tB2\tCREATE\t${timestamp}" >> ${CHUNKLOG}
+			meta_accessid[0]="PREVIOUS_ID\t0"
+			meta_accessid[1]="TIME\t${timestamp}"
+			meta_accessid[2]="USERID\t$(uid -u)"
+			meta_accessid[3]="GROUPID\t$(uid -g)"
+		fi
+		for i in $(seq 0 3)
+		do
+			echo -e ${meta_accessid[$i]} >> ${METAACESSID}
+		done
+		fi
+
+		####################	
+		# Create the speculative backreference that ties the
+		# name to the chunk.
+		####################	
+		create_spec_back_ref ${chid} ${nhid}
 
 		####################	
 		# See hashdirpath to see how the directories
@@ -192,6 +239,7 @@ do
 		ldir="${filename%/*}"
 		mkdir -p "${yesfsdir}/${ldir}"
 		echo "${nhid}" >> "${yesfsdir}/${filename}"
+
 		####################
 		# If the NHID already exists it means we have a prior
 		# version of this name.
