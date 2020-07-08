@@ -78,12 +78,12 @@ done
 shift "$(($OPTIND - 1))"
 [ $# -lt $NUMARGS ] && { echo -e ${USAGE}; exit -1; }
 topdir=$1
-shift
-if [ $# -ge 0 ]
+if [ $# -ge 2 ]
 then
-	yesfsdir=$1
+	yesfsdir=$2
 fi
-TMPDIR=/tmp/${yesfsdir}.$$.dir
+set -x
+TMPDIR=/tmp/${yesfsdir##*/}.$$.dir
 mkdir -p ${TMPDIR}
 if [ ! -d ${yesfsdir} ]
 then
@@ -97,7 +97,7 @@ then
 	echo "Not a directory ${topdir}"
 	exit 0
 fi
-
+set +x
 ####################
 # Find all of the directories in the current path and put the list
 # of directories in a file.  We will process the files one directory
@@ -191,7 +191,7 @@ do
 		fullnhid=${p_nhid}/${nhid}.NHID
 		ldir="${filename%/*}"
 		mkdir -p "${yesfsdir}/${ldir}"
-		echo "${p_nhid}/${nhid}" >> "${yesfsdir}/${ldir}/${filename}"
+		echo "${nhid}" >> "${yesfsdir}/${filename}"
 		####################
 		# If the NHID already exists it means we have a prior
 		# version of this name.

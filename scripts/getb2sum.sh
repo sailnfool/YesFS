@@ -4,17 +4,17 @@ scriptname=${0##*/}
 #_____________________________________________________________________
 # Rev.|Auth.| Date     | Notes
 #_____________________________________________________________________
-# 1.0 | REN |11/21/2019| Initial Release
+# 1.0 | REN |07/07/2020| Initial Release
 #_____________________________________________________________________
 #
 ####################
 # Author Robert E. Novak
 #
-# This script invokes the b2sum application to create a cryptographic
-# hash of a string parameter or of a named file.
+# This script uses b2sum to generate the first 8 characters of string
+# which is arg1.
 #
-# The -b option returns only the last 4 characters of the cryptographic
-# hash
+# These characters are used as sample characters in the explanation
+# of the field description
 #
 
 source func.errecho
@@ -26,10 +26,11 @@ USAGE="\r\n${scriptname} [-h] [ -d # ] [-b] [ -s <string> ] <filename>\r\n
 \t-b\tReturn the brief (last for hex digits) of the hash\r\n
 \t-s <string>\treturn the b2sum hash of <string>\r\n"
 
-optionargs="hd:bs:"
+optionargs="hd:fbs:"
 NUMARGS=1
 FUNC_DEBUG="0"
 BRIEF=FALSE
+FIRST=FALSE
 export FUNC_DEBUG
 
 while getopts ${optionargs} name
@@ -46,6 +47,9 @@ do
 		;;
 	b)
 		BRIEF=TRUE
+		;;
+	f)
+		FIRST=TRUE
 		;;
 	d)
 		FUNC_DEBUG=${OPTARG}
@@ -90,6 +94,11 @@ then
 	briefhash=${hashstring:0:128}
 	echo ${briefhash:(-4)}
 else
-	echo ${hashstring:0:128}
+	if [ "$FIRST" = "TRUE" ]
+	then
+		echo ${hashstring:0:8}
+	else
+		echo ${hashstring:0:128}
+	fi
 fi
 # vim: set syntax=bash

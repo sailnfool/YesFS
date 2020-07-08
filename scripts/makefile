@@ -1,15 +1,17 @@
-
 SHELL=/bin/bash
 PREFIX?=$(HOME)
 .sh:
 	@rm -f $@
 	cp $< $@
+INSTALL = getb2sum \
+	  getb28 \
+	  genb2 oneb2 twob2 twob2a threeb2 fourb2 fiveb2 \
 
 EXECDIR := $(PREFIX)/bin
 
 .PHONY: clean uninstall all
-all: 
-	cd scripts ;make uninstall install clean
+all: $(INSTALL)
+	make uninstall install clean
 install: $(INSTALL)
 	mkdir -p $(EXECDIR)
 	install -o $(USER) -C $? $(EXECDIR)
