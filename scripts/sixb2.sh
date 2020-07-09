@@ -1,6 +1,7 @@
 #!/bin/bash
-source yfunc.hashdirpath
 source func.errecho
+source yfunc.hashdirpath
+source yfunc.global
 USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
 \t<directory>\tThe directory that will be converted to a YesFS\n
 \t\t\tfile system prototype using b2sum cryptographic hash.\n
@@ -134,20 +135,13 @@ do
 		# A line beginning with "Failed" is a directory or
 		# other special file.  Ignore
 		####################
-		if [ "${hashline:0:5}" == "Failed" ]
+		Failed_string="Failed"
+		if [ "${hashline:0:${#Failed_string}}" == "Failed" ]
 		then
 			continue
 		fi
 
-		####################	
-		# Get the content hash ID of the file: CHID
-		# and the filename
-		####################	
-		chid=${hashline:0:128}
-		p_chid=$(hashdirpath ${chid})
-		f_chid="${p_chid}/${chid}"
-
-		filename=${hashline:130}
+		filename=${hashline:${b2file}}
 		if [ ! -f "${filename}" ]
 		then
 			echo "filename=${filename} is not a file"
@@ -156,11 +150,21 @@ do
 
 		((FILECOUNT++))
 
+		
+
+		####################	
+		# Get the content hash ID of the file: CHID
+		# and the filename
+		####################	
+		chid=${hashline:0:${b2len}}
+		p_chid=$(hashdirpath ${chid})
+		f_chid="${p_chid}/${chid}"
+
 		####################	
 		# Get the name hash ID of the file: NHID
 		####################	
 		namehash=$(echo ${filename} | b2sum)
-		nhid=${namehash:0:128}
+		nhid=${namehash:0:${b2len}}
 
 		####################	
 		# This timestamp will create a new time stamp each
@@ -256,7 +260,7 @@ do
 			# from the prior manifest
 			####################
 			prevmnidhash=$(b2sum ${manid})
-			prevmnid=${prevmnidhash:0:128}
+			prevmnid=${prevmnidhash:0:${b2len}}
 			p_mnid=$(hashdirpath ${prevmnid})
 			pmanid=${p_mnid}/${prevmnid}
 			prev_objid=$(awk -F'\t' '/OBJECTVERSION/{print $2}' < ${manid})
