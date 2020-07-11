@@ -1,4 +1,7 @@
 #!/bin/bash
+if [ -z "${__yfunc_global}" ]
+then
+	export __yfunc_global=1
 ################################################################################
 # Global Strings used in YesFS data structures
 #
@@ -32,6 +35,22 @@
 YESFS=/YesFS
 HASHES=${YESFS}/.hash
 CHUNKLOG=${YESFS}/.chunklog
+FAILEDTOHASH_string="Failed to hash \`"
+
+####################	
+# This timestamp will create a new time stamp each
+# time it is referenced.  It creates two fields:
+# YYYYMMDD_HHMMSS
+# seconds_since_epoch.current_nanoseconds
+#
+# By removing the '\' at the beginning of the string
+# this would become a single timestamp for all elements
+# of the object creation, which may be desirable.
+#
+# This should be in the format of the AWS S3 timestamp
+####################	
+timestamp="\$(date -u '+%Y%m%d_%T\t%s.%N')"
+
 
 ################################################################################
 # Suffixes
@@ -198,3 +217,5 @@ HASH_00=""		# HASH of the first [00] chunk of the object
 			# .
 			# .
 HASH_FF=""		# HASH of the first [FF] chunk of the object
+fi # if [ -z "${__yfunc_global}" ]
+
