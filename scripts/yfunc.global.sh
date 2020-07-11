@@ -51,6 +51,8 @@ FAILEDTOHASH_string="Failed to hash \`"
 ####################	
 timestamp="\$(date -u '+%Y%m%d_%T\t%s.%N')"
 
+b2len=128
+b2file=130
 
 ################################################################################
 # Suffixes
@@ -73,6 +75,8 @@ CHUNKMANI	# Chunk Manifest
 SUFFIX[NHID]="NHID"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as meta-type
 			# VALUE = "NHID"
+NAMECHUNK="NAMECHUNK"	# The hash value of the chunk which holds the
+			# string which is the object name
 MANIFEST="MANIFEST"	# Hash of the object manifest that the name refers to
 NAMEMETA="NAMEMETA"	# Hash of the name-affiliated metadata (e.g. owner,
 			# group, permissions
