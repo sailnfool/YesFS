@@ -39,9 +39,8 @@ FAILEDTOHASH_string="Failed to hash \`"
 
 ####################	
 # This timestamp will create a new time stamp each
-# time it is referenced.  It creates two fields:
-# YYYYMMDD_HHMMSS
-# seconds_since_epoch.current_nanoseconds
+# time it is referenced.  The Time stamp is represented
+# in the format of the ISO 8601-2:2019 interchange format
 #
 # By removing the '\' at the beginning of the string
 # this would become a single timestamp for all elements
@@ -49,7 +48,7 @@ FAILEDTOHASH_string="Failed to hash \`"
 #
 # This should be in the format of the AWS S3 timestamp
 ####################	
-timestamp="\$(date -u '+%Y%m%d_%T\t%s.%N')"
+timestamp="\$(date -u -Ins)"
 
 b2len=128
 b2file=130
@@ -75,8 +74,9 @@ CHUNKMANI	# Chunk Manifest
 SUFFIX[NHID]="NHID"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as meta-type
 			# VALUE = "NHID"
-NAMECHUNK="NAMECHUNK"	# The hash value of the chunk which holds the
+LABELCHUNK="LABELCHUNK"	# The hash value of the chunk which holds the
 			# string which is the object name
+NAMECHUNK="NAMECHUNK"	# The hash of the object that the name refers to.
 MANIFEST="MANIFEST"	# Hash of the object manifest that the name refers to
 NAMEMETA="NAMEMETA"	# Hash of the name-affiliated metadata (e.g. owner,
 			# group, permissions
@@ -154,10 +154,12 @@ MAJOR="MAJOR"		# The major version number of the manifest format
 MINOR="MINOR"		# The minor version number of the manifest format
 			# For Major,Minor of {0,1} The max count of internal
 			# hashes is 8.  Subject to change over time
+NAMECHUNK="NAMECHUNK"	# This is the hash of the entire object that this
+			# manifest refers to.
 SIZE="SIZE"		# The size of the object in bytes.  Note that for
 			# sparse objects this may be misleading.
-CREATETIME="CREATETIME"	# The time that the manifest is created in seconds
-			# since the EPOCH
+CREATETIME="CREATETIME"	# The time that the manifest is created stored
+			# as ISO 8601-2019:2 format
 USEDHASHES="USEDHASHES"	# The number of hashes in use for this object.
 			# If this value is set to zero, then the 
 			# remaining space in the manifest is used for
