@@ -108,7 +108,17 @@ do
 	fi
 
 	####################	
-	# Get the name hash ID of the file: NHID
+	# nhid   is the name hash ID of the file: NHID Daka $nhid
+	# p_nhid represents the directory path in the local file
+	#        system where we will place the NHID object.
+	# f_nhid is the full path ${p_nhid}/${nhid}
+	#
+	# Note that for the moment we are "punting" on the notion of
+	# creating directories that make up the "$(dirname ${filename})"
+	# In order to do this properly, we not only have to insure that
+	# the objects exist in the full path, but add appropriate sub
+	# directories and at the last element add the filename as a
+	# member of the leaf/edge directory.
 	####################	
 	nhid=$(put_nhid "${filename}" "${yesfsdir}")
 
