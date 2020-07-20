@@ -121,11 +121,9 @@ do
 	# member of the leaf/edge directory.
 	####################	
 	nhid=$(put_nhid "${filename}" "${yesfsdir}")
-
-
-	((FILECOUNT++))
 	p_nhid=$(hashdirpath ${nhid})
 	f_nhid="${p_nhid}/${nhid}"
+	((FILECOUNT++))
 
 	####################	
 	# Get the content hash ID of the file: CHID
