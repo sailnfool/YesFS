@@ -144,7 +144,7 @@ NEXT="NEXT"		# The hash of the next backreference record for
 NAMEHASH="NAMEHASH"	# The Name Hash ID of the first name that
 			# refers to this object.
 BACKTIME="BACKTIME"	# the time stamp of the creation of the
-			# bachreference record
+			# backreference record
 SPEC="SPEC"		# Flag to indicate if this is a speculative 
 			# backref.  Initially set to TRUE, set to FALSE
 			# upon completion of creating the Manifest for

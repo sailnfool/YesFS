@@ -120,7 +120,11 @@ do
 	# directories and at the last element add the filename as a
 	# member of the leaf/edge directory.
 	####################	
-	nhid=$(put_nhid "${filename}" "${yesfsdir}")
+	nhid=$(put_nhid "${filename}" "${yesfsdir}" "${timestamp}" \
+	    "${CHUNKLOG}")
+
+
+	((FILECOUNT++))
 	p_nhid=$(hashdirpath ${nhid})
 	f_nhid="${p_nhid}/${nhid}"
 	((FILECOUNT++))
