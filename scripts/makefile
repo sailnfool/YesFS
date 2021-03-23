@@ -5,7 +5,7 @@ PREFIX?=$(HOME)
 	cp $< $@
 INSTALL = getb2sum \
 	  getb28 \
-	  genb2 oneb2 twob2 twob2a threeb2 fourb2 fiveb2 \
+	  genb2  \
 	  yfunc.create_spec_backref \
 	  yfunc.hashdirpath \
 	  yfunc.global

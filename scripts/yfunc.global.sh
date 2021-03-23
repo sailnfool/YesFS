@@ -20,7 +20,7 @@ then
 # directory tree which divides the files into directories so that no
 # single directory will be more than ~100,000 files per directory
 #
-# Directory name use 2 bytes of the ASCII encoding of the hash name,
+# Directory name uses 2 bytes of the ASCII encoding of the hash name,
 # starting at the most significant bits of the hash name string.
 #
 # File systems with less than 65,536 files (256^2) will have one level
@@ -57,16 +57,35 @@ b2file=130
 ########################################################################
 # Suffixes
 ########################################################################
+  # Chunk Hash ID, normally elided, absence implies this
+CHID=1
+  # Name Hash ID
+NHID=2
+  # Meta data affiliated with a chunk
+META=3
+  # A back reference for a chunk.  These are speculative or confirmed
+BACK=4
+  # A Manifest for an object
+MANI=5
+  # Chunk Meta data
+CHUNKMETA=6
+  # Chunk Access data
+CHUNKACCESS=7
+  # Chunk Manifest
+CHUNKMANI=8
+
 declare -a SUFFIX
-CHID	# Chunk Hash ID, normally elided, absence implies this
-NHID	# Name Hash ID
-META	# Meta data affiliated with a chunk
-BACK	# A back reference for a chunk.  These are speculative or
-	# confirmed
-MANI	# A Manifest for an object
-CHUNKMETA	# Chunk Meta data
-CHUNKACCESS	# Chunk Access data
-CHUNKMANI	# Chunk Manifest
+SUFFIX=( ${CHID} ${NHID} ${META} ${BACK} ${MANI} ${CHUNKMETA} \
+  ${CHUNKACCESS} ${CHUNKMANI} )
+# CHID	# Chunk Hash ID, normally elided, absence implies this
+# NHID	# Name Hash ID
+# META	# Meta data affiliated with a chunk
+# BACK	# A back reference for a chunk.  These are speculative or
+# 	# confirmed
+# MANI	# A Manifest for an object
+# CHUNKMETA	# Chunk Meta data
+# CHUNKACCESS	# Chunk Access data
+# CHUNKMANI	# Chunk Manifest
 
 ########################################################################
 # Descriptive names within YesFS metadata structures
