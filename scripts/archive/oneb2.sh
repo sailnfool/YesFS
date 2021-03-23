@@ -24,9 +24,11 @@ fi
 # echo $LINENO working on $1
 b2hash=$(b2sum "$1" 2>/dev/null)
 # echo "$LINENO b2hash=${b2hash}"
-hashonly=$(echo ${b2hash} | cut -d ' ' -f 1)
+#hashonly=$(echo ${b2hash} | cut -d ' ' -f 1)
+hashonly=${b2hash:0:127}
 # echo "$LINENO hashonly=${hashonly}"
-directoryname=$(echo ${hashonly}|sed 's/^\(..\).*/\1/')
+#directoryname=$(echo ${hashonly}|sed 's/^\(..\).*/\1/')
+directoryname=${hashonly:0:1}
 # echo "$LINENO directoryname=${directoryname}"
 if [ -z "${directoryname}" ]
 then

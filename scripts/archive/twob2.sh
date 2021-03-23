@@ -43,8 +43,8 @@ do
 		((HASHCNT++))
 		b2hash=$(b2sum "${filename}" 2>/dev/null)
 		# echo "b2hash of ${filename}=${b2hash}"
-		hashonly=$(echo ${b2hash} | cut -d ' ' -f 1)
-		directoryname=$(echo ${hashonly}|sed 's/^\(..\).*/\1/')
+		hashonly=${b2hash:0:128}
+		directoryname=${hashonly:0:2}
 		if [[ ! ${directoryname} =~ ${re_hexnumber} ]]
 		then
 			echo $LINENO working on "${filename}"
