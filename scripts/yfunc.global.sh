@@ -38,6 +38,20 @@ HASHES=${YESFS}/.hash
 CHUNKLOG=${YESFS}/.chunklog
 FAILEDTOHASH_string="Failed to hash \`"
 
+####################
+# Define a set of regular expressions for various tests of inputs
+# When you want to test a variable, do NOT place the expansion of
+# the re_xxxx value in quotes.  It will not work.
+#
+# if [[ "$input_value" =~ $re_hexnumber ]]
+# then
+#     echo "$input_value is a valid hex number
+# fi
+####################
+re_hexnumber='^[0-9a-fA-F][0-9a-fA-F]*$'
+re_integer='^[0-9][0-9]*$'
+re_decimal='^[+\-][0-9]*\.[0-9]*$'
+
 ####################	
 # This timestamp will create a new time stamp each
 # time it is referenced.  The Time stamp is represented

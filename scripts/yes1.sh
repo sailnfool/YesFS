@@ -23,9 +23,8 @@ optionargs="hdv"
 NUMARGS=1
 debug=0
 verbose=1
-yesfsdir=/hashes
+yesfsdir=${yesfsdir:="/hashes"}
 FILECOUNT=0
-re_hexnumber='^[0-9a-f][0-9a-f]*$'
 
 while getopts ${optionargs} name
 do
