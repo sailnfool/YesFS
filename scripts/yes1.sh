@@ -1,9 +1,27 @@
 #!/bin/bash
+########################################################################
+# Author: Robert E. Novak
+# email: sailnfool@gmail.com
+# Copyright (C) 2021 Sea2Cloud Storage, Inc. All Rights Reserved
+# Modesto, CA 95356
+#
+# Create a hashed object for a single file
+#
+########################################################################
+#_____________________________________________________________________
+# Rev.|Auth.| Date     | Notes
+#_____________________________________________________________________
+# 1.0 | REN |03/25/2021| original version
+#_____________________________________________________________________
+
 source yfunc.global
 source yfunc.hashdirpath
 source yfunc.maketop
 source yfunc.put_nhid
 source func.errecho
+source func.locker
+source func.regex
+
 USAGE="${0##*/} [-h] [-d] <file>\n
 \t\tThis command will create a YesFS file from the file passed as an\n
 \t\targument.  The default places for files are inherited environment\n
@@ -19,12 +37,19 @@ USAGE="${0##*/} [-h] [-d] <file>\n
 \t\t\tevery 7000 files.\n
 "
 
+####################
+# Set up the testing directory and setup for locking the filecount
+####################
+func_setuplocks
+
+####################
+# environmental and script dependent variables.
+####################
 optionargs="hdv"
 NUMARGS=1
 debug=0
 verbose=1
-yesfsdir=${yesfsdir:="/hashes"}
-FILECOUNT=0
+YesFSdir=${YesFSdir:="/hashes"}
 
 while getopts ${optionargs} name
 do
@@ -53,7 +78,6 @@ shift "$(($OPTIND - 1))"
 [ $# -lt $NUMARGS ] && { echo -e ${USAGE}; exit -1; }
 
 filename="$1"
-
 if [ ! -f "${filename}" ]
 then
 	echo "filename=${filename} is not a file"
@@ -73,14 +97,13 @@ fi
 # directories and at the last element add the filename as a
 # member of the leaf/edge directory.
 ####################	
-nhid=$(put_nhid "${filename}" "${yesfsdir}" "${timestamp}" \
+nhid=$(put_nhid "${filename}" "${YesFSdir}" "${timestamp}" \
     "${CHUNKLOG}")
 
-
-((FILECOUNT++))
+FILECOUNT=$(func_nextgetcounter "${FILECOUNT.lock}" \
+  "${FILECOUNT.file}" )
 p_nhid=$(hashdirpath ${nhid})
 f_nhid="${p_nhid}/${nhid}"
-((FILECOUNT++))
 
 ####################	
 # Get the content hash ID of the file: CHID
@@ -137,7 +160,6 @@ else
 	meta_accessid[0]="PREVIOUS_ID\t0"
 	meta_accessid[1]="TIME\t${timestamp}"
 	meta_accessid[2]="USERID\t$(uid -u)"
-	meta_accessid[3]="GROUPID\t$(uid -g)"
 fi
 for i in $(seq 0 3)
 do
@@ -162,8 +184,8 @@ p_nhid=$(hashdirpath ${nhid})
 manid=${p_nhid}/${nhid}.MANIFEST
 fullnhid=${p_nhid}/${nhid}.NHID
 ldir="${filename%/*}"
-mkdir -p "${yesfsdir}/${ldir}"
-echo "${nhid}" >> "${yesfsdir}/${filename}"
+mkdir -p "${YesFSdir}/${ldir}"
+echo "${nhid}" >> "${YesFSdir}/${filename}"
 
 ####################
 # If the NHID already exists it means we have a prior
@@ -235,5 +257,5 @@ echo -e "NAME\t${filename}" >> ${p_chid}/${chid}.CHID
 [[ ${verbose} -eq 1 && \
 	$(expr ${FILECOUNT} % 7000) -eq 0 ]] && \
 	{ \
-		echo ""; echo "$(date '+%T') ${FILECOUNT}"
+		echo ""; echo "${timestamp} ${FILECOUNT}"
 	}
