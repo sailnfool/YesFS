@@ -6,36 +6,43 @@ source yfunc.put_nhid
 source func.errecho
 source func.regex
 
-USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\n
-\t<directory>\tThe directory that will be converted to a YesFS\n
-\t\t\tfile system prototype using b2sum cryptographic hash.\n
-\t<rootpath>\tThe directory where the YesFS file system will be\n
-\t\t\tplaced.  Default is /hashes. Requests SU privileges\n
-\t\t\tto create.  A \"normal\" looking file tree is located\n
-\t\t\tat <rootpath>.  The contents of the filenames in this\n
-\t\t\tdirectory tree will be the Name Hash ID (NHID) of the\n
-\t\t\tnamed file.  This is only for the convenience of\n
-\t\t\tdevelopers/debuggers to browse a normal tree in the\n
-\t\t\tlocal file system.  The local file system will place the\n
-\t\t\thash files in <rootpath>/.hash.  Using the PUT and\n
-\t\t\tGET commands and library functions will allow the\n
-\t\t\tretrieval of the file contents and/or metadata.\n
-\n\t~!~!~!~!~!~! WARNING ~!~!~!~!~!~!\n
-\tSTILL UNDER DEVELOPMENT - MAY BE BROKEN\n\n
-\t-h\t\tPrint this help information.\n
-\t-d\t\tPrint diagnostic information\n
-\t\t\t(dump manifests as created).\n
-\t-v\t\tPrints a '.' for every 100 files processed.\n
-\t\t\tDefault is on.\n
-\t\t\tToggles the default.  Prints a timestamp\n
-\t\t\tevery 7000 files.\n
+USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\r\n
+\t<directory>\tThe directory that will be converted to a YesFS\r\n
+\t\t\tfile system prototype using b2sum cryptographic hash.\r\n
+\t<rootpath>\tThe directory where the YesFS file system will be\r\n
+\t\t\tplaced.  Default is ~/.hashes. \r\n
+\r\n
+\t~!~!~!~!~!~! WARNING ~!~!~!~!~!~!\r\n
+\tSTILL UNDER DEVELOPMENT - MAY BE BROKEN\r\n\r\n
+\t-h\t\tPrint this help information.\r\n
+\t-d\t\tPrint diagnostic information\r\n
+\t\t\t(dump manifests as created).\r\n
+\t-v\t\tPrints a '.' for every 100 files processed.\r\n
+\t\t\tDefault is on.\r\n
+\t\t\tToggles the default.  Prints a timestamp\r\n
+\t\t\tevery 7000 files.\r\n
+"
+USAGE_VERBOSE="\t\t\tA \"normal\" looking file tree is located\r\n
+\t\t\tat <rootpath>.  The contents of the filenames in this\r\n
+\t\t\tdirectory tree will be the Name Hash ID (NHID) of the\r\n
+\t\t\tnamed file.  This is only for the convenience of\r\n
+\t\t\tdevelopers/debuggers to browse a normal tree in the\r\n
+\t\t\tlocal file system.  The local file system will place the\r\n
+\t\t\thash files in <rootpath>/.hash.  Using the PUT and\r\n
+\t\t\tGET commands and library functions will allow the\r\n
+\t\t\tretrieval of the file contents and/or metadata.\r\n
 "
 
 optionargs="hdv"
 NUMARGS=2
 debug=0
 verbose=1
-export YesFSdir=${YesFSdir:=/hashes}
+if [ ${EUID} -eq 9 ]
+then
+  export YesFSdir=${YesFSdir:=/hashes}
+else
+  export YesFSdir=${YesFSdir:=${HOME}/.hashes}
+fi
 func_putcounter "${FILECOUNT.lock}" "${FILECOUNT.file}" 0
 export FILECOUNT=$(func_getcounter "${FILECOUNT.lock}" \
   "${FILECOUNT.file}")
@@ -45,6 +52,9 @@ do
 	case ${name} in
 	h)
 		echo -e ${USAGE}
+    if [ "${verbose}" -eq 1 ]
+    then
+      echo -e ${USAGE_VERBOSE}
 		exit 0
 		;;
 	d)
