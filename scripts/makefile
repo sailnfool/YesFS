@@ -5,8 +5,14 @@ PREFIX?=$(HOME)
 	cp $< $@
 INSTALL = getb2sum \
 	  getb28 \
+		yespara \
+		yes1 \
 	  yfunc.create_spec_backref \
+		yfunc.maketop \
 	  yfunc.hashdirpath \
+		yfunc.create_spec_backref \
+		yfunc.put_first_backref \
+		yfunc.put_nhid \
 	  yfunc.global
 
 

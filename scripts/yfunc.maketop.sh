@@ -4,25 +4,25 @@ then
 	export __yfunc_maketop=1
 
 	function maketop {
-		yesfsdir=$1
+		YesFSdir=$1
 		TMPTOP="/tmp"
-		YTMPDIR="${TMPTOP}/${yesfsdir##*/}.$$.dir"
-		HASHES="${yesfsdir}/.hash"
-		CHUNKLOG="${yesfsdir}/.chunklog"
+		YTMPDIR="${TMPTOP}/${YesFSdir##*/}.$$.dir"
+		HASHES="${YesFSdir}/.hash"
+		CHUNKLOG="${YesFSdir}/.chunklog"
 		if [ ! -d "${YTMPDIR}" ]
 		then
-			sudo mkdir -p ${YTMPDIR}
-			sudo chmod 777 ${YTMPDIR}
+			mkdir -p ${YTMPDIR}
+			chmod 777 ${YTMPDIR}
 		fi
 		if [ ! -d "${HASHES}" ]
 		then
-			sudo mkdir -p ${HASHES}
-			sudo chmod 777 ${HASHES}
+			mkdir -p ${HASHES}
+			chmod 777 ${HASHES}
 		fi
 		if [ ! -d "${CHUNKLOG}" ]
 		then
-			sudo mkdir -p ${CHUNKLOG}
-			sudo chmod 777 ${CHUNKLOG}
+			mkdir -p ${CHUNKLOG}
+			chmod 777 ${CHUNKLOG}
 		fi
 		
 		export TMPTOP YTMPDIR HASHES CHUNKLOG

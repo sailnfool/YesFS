@@ -41,8 +41,8 @@ HASHES=${YESFS}/.hash
 CHUNKLOG=${YESFS}/.chunklog
 FAILEDTOHASH_string="Failed to hash \`"
 
-FILECOUNT.lock=${TESTDIR}/FILECOUNT.lock
-FILECOUNT.file=${TESTDIR}/FILECOUNT.file
+FILECOUNT.lock="${TESTDIR}/FILECOUNT.lock"
+FILECOUNT.file="${TESTDIR}/FILECOUNT.file"
 
 ####################	
 # This timestamp will create a new time stamp each
@@ -96,9 +96,17 @@ SUFFIX=( ${CHID} ${NHID} ${META} ${BACK} ${MANI} ${CHUNKMETA} \
 ########################################################################
 # Descriptive names within YesFS metadata structures
 ########################################################################
+# CHID Name Hash
+########################################################################
+SUFFIX[${CHID}="CHID"
+########################################################################
+# META Name Hash
+########################################################################
+SUFFIX[${META}]="META"
+########################################################################
 # NHID Name Hash
 ########################################################################
-SUFFIX[NHID]="NHID"
+SUFFIX[${NHID}]="NHID"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type
 			# VALUE = "NHID"
@@ -114,7 +122,7 @@ NAMEMETA="NAMEMETA"	# Hash of the name-affiliated metadata (e.g.
 ########################################################################
 # CHUNKMETA Metadata for a Chunk
 ########################################################################
-SUFFIX[CHUNKMETA]="CHUNKMETA"
+SUFFIX[${CHUNKMETA}]="CHUNKMETA"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "CHUNKMETA"
 SIZE="SIZE"		# The size of the chunk in bytes
@@ -125,7 +133,7 @@ ACCESS="ACCESS"		# The hashid of the most recent access record
 ########################################################################
 # CHUNKACCESS Metadata for a Chunk
 ########################################################################
-SUFFIX[CHUNKACCESS]="CHUNKACCESS"
+SUFFIX[${CHUNKACCESS}]="CHUNKACCESS"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "CHUNKACCESS"
 PREVIOUS="PREVIOUS"	# The hash of the previous access time record
@@ -159,7 +167,7 @@ SYSTEMID="SYSTEMID"	# The system ID of the system that accessed the
 ########################################################################
 # BACKREF Metadata for a Chunk
 ########################################################################
-SUFFIX[BACK]="BACK"
+SUFFIX[${BACK}]="BACK"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "BACK"
 PREVIOUS="PREVIOUS"	# The hash of the previous backreference record
@@ -177,7 +185,7 @@ SPEC="SPEC"		# Flag to indicate if this is a speculative
 ########################################################################
 # MANI Manifest Metadata for an object
 ########################################################################
-SUFFIX[MANI]="MANI"
+SUFFIX[${MANI}]="MANI"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "MANI"
 PREVIOUS="PREVIOUS"	# The hash of the previous manifest record
@@ -211,6 +219,17 @@ USEDHASHES="USEDHASHES"	# The number of hashes in use for this object.
 			# 240bytes plus 8*sizeof("HASH_0\t%128x\n")
 			# =1088 + 240 = 1328 bytes of storage in
 			# internal manifest storage
+
+# Rethinking this entire section.  The in-memory version is an
+# extensible array.  When written to storage, this is an array of
+# size "USEDHASHES" that contains all fo the pairs of offsets and
+# chunk hashes.  This is on local store in the originating machine
+# only.  As the manifest is prepared for "put" to other storage
+# destinations, an isomorphic representation of this manifest may
+# contain a tree of chunk manifests that can point to either other
+# chunk manifests or at the leaves of the tree, the chunks that
+# represent the object.
+#
 OFFSET_0=""		# Offset to the [0] chunk of the object
 			# Note that in a sparse object, this may be
 			# non-zero.  Since each of the chunks may be
@@ -237,7 +256,7 @@ HASH_7			# HASH of the [7] chunk of the object
 ########################################################################
 # CHUNKMANI Manifest Metadata for an object
 ########################################################################
-SUFFIX[CHUNKMANI]="CHUNKMANI"
+SUFFIX[${CHUNKMANI}]="CHUNKMANI"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "OBJMANI"
 SIZE="SIZE"		# The size of the chunk in bytes
