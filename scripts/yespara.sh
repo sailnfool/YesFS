@@ -8,8 +8,9 @@ source func.locker
 source func.regex
 
 USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\r\n
-\t<directory>\tThe directory that will be converted to a YesFS\r\n
-\t\t\tfile system prototype using b2sum cryptographic hash.\r\n
+\t<directory>\tThe directory that will be copies and converted\r\n
+\t\t\tto a YesFS file system prototype using b2sum cryptographici\r\n
+\t\t\thash.\r\n
 \t<rootpath>\tThe directory where the YesFS file system will be\r\n
 \t\t\tplaced.  Default is ~/.hashes. \r\n
 \r\n
