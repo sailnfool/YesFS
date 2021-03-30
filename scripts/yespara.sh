@@ -4,6 +4,7 @@ source yfunc.hashdirpath
 source yfunc.maketop
 source yfunc.put_nhid
 source func.errecho
+source func.locker
 source func.regex
 
 USAGE="${0##*/} [-h] [-d] <directory> [ <rootpath> ]\r\n
@@ -43,9 +44,9 @@ then
 else
   export YesFSdir=${YesFSdir:=${HOME}/.hashes}
 fi
-func_putcounter "${FILECOUNT.lock}" "${FILECOUNT.file}" 0
-export FILECOUNT=$(func_getcounter "${FILECOUNT.lock}" \
-  "${FILECOUNT.file}")
+func_putcounter "${FILECOUNT_lock}" "${FILECOUNT_file}" 0
+export FILECOUNT=$(func_getcounter "${FILECOUNT_lock}" \
+  "${FILECOUNT_file}")
 
 while getopts ${optionargs} name
 do
@@ -55,6 +56,7 @@ do
     if [ "${verbose}" -eq 1 ]
     then
       echo -e ${USAGE_VERBOSE}
+    fi
 		exit 0
 		;;
 	d)

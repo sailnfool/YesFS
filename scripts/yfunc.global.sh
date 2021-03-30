@@ -41,8 +41,8 @@ HASHES=${YESFS}/.hash
 CHUNKLOG=${YESFS}/.chunklog
 FAILEDTOHASH_string="Failed to hash \`"
 
-FILECOUNT.lock="${TESTDIR}/FILECOUNT.lock"
-FILECOUNT.file="${TESTDIR}/FILECOUNT.file"
+FILECOUNT_lock="${TESTDIR}/FILECOUNT.lock"
+FILECOUNT_file="${TESTDIR}/FILECOUNT.file"
 
 ####################	
 # This timestamp will create a new time stamp each
@@ -79,6 +79,8 @@ CHUNKMETA=6
 CHUNKACCESS=7
   # Chunk Manifest
 CHUNKMANI=8
+  # Name metadata
+NAMEMETA=9
 
 declare -a SUFFIX
 SUFFIX=( ${CHID} ${NHID} ${META} ${BACK} ${MANI} ${CHUNKMETA} \
@@ -98,7 +100,7 @@ SUFFIX=( ${CHID} ${NHID} ${META} ${BACK} ${MANI} ${CHUNKMETA} \
 ########################################################################
 # CHID Name Hash
 ########################################################################
-SUFFIX[${CHID}="CHID"
+SUFFIX[${CHID}]="CHID"
 ########################################################################
 # META Name Hash
 ########################################################################
@@ -116,7 +118,7 @@ NAMECHUNK="NAMECHUNK"	# The hash of the object that the name refers
 			# to.
 MANIFEST="MANIFEST"	# Hash of the object manifest that the name
 			# refers to
-NAMEMETA="NAMEMETA"	# Hash of the name-affiliated metadata (e.g.
+#NAMEMETA="NAMEMETA"	# Hash of the name-affiliated metadata (e.g.
 			# owner,
 			# group, permissions
 ########################################################################
@@ -149,7 +151,7 @@ SYSTEMID="SYSTEMID"	# The system ID of the system that accessed the
 ########################################################################
 # NAMEMETA Metadata for a NHID
 ########################################################################
-SUFFIX[NAMEMETA]="NAMEMETA"
+SUFFIX[${NAMEMETA}]="NAMEMETA"
 HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
 			# meta-type VALUE = "NAMEMETA"
 PREVIOUS="PREVIOUS"	# The has of the previous creation time record
