@@ -6,7 +6,8 @@ PREFIX?=$(HOME)
 INSTALL = getb2sum \
 	  getb28 \
 		yespara \
-		yes1 
+		yes1 \
+		checkhashes
 
 EXECDIR := $(PREFIX)/bin
 
