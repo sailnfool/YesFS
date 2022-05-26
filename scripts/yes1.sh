@@ -135,6 +135,7 @@ CHUNKID="${f_chid}.CHID"
 METAID="${f_chid}.METACHUNK"
 METAACCESSID="${f_chid}.METACHUNKACCESS"
 if [ -f "${CHUNKID}" ]
+then
 	echo -e "${chid}\tCHID\tB2\tACCESS\t${timestamp}" >> ${CHUNKLOG}
 	if [ ! -f ${METAACCESSID} ]
 	then
