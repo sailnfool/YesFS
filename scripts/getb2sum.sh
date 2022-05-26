@@ -23,7 +23,7 @@ USAGE="\r\n${scriptname} [-h] [ -d # ] [-b] [ -s <string> ] <filename>\r\n
 \t\treturn the b2sum hash of a string or a filename\r\n
 \t-h\tPrint this message\r\n
 \t-d #\tturn on diagnostics to level #\r\n
-\t-b\tReturn the brief (last for hex digits) of the hash\r\n
+\t-b\tReturn the brief (last four hex digits) of the hash\r\n
 \t-s <string>\treturn the b2sum hash of <string>\r\n"
 
 optionargs="hd:fbs:"
