@@ -1,9 +1,10 @@
 SHELL=/bin/bash
-PREFIX?=$(HOME)/.local
+PREFIX?=$(HOME)
+LPREFIX?=$(HOME)/.local
 .sh:
 	@rm -f $@
 	cp $< $@
-INSTALL = yfunc.create_spec_backref \
+LINSTALL = yfunc.create_spec_backref \
 		yfunc.maketop \
 	  yfunc.hashdirpath \
 		yfunc.create_spec_backref \
@@ -13,17 +14,22 @@ INSTALL = yfunc.create_spec_backref \
 
 
 EXECDIR := $(PREFIX)/bin
+LEXECDIR := $(LPREFIX)/bin
 
 .PHONY: clean install uninstall all
-all: $(INSTALL)
+all: $(LINSTALL) $(INSTALL)
 	make uninstall install
 
 install: $(INSTALL)
 	mkdir -p $(EXECDIR)
 	install -o $(USER) -C $? $(EXECDIR)
-
+	rm -f $?
+linstall: $(LINSTALL)
+	mkdir -p $(LEXECDIR)
+	install -o $(USER) -c $? $(LEXECDIR)
+	rm -f $?
 clean: 
-	@for execfile in $(INSTALL) ; do \
+	@for execfile in $(INSTALL) $(LINSTALL); do \
 		echo rm -f $$execfile; \
 		rm -f $$execfile; \
 	done
@@ -36,3 +42,5 @@ uninstall:
 
 $(EXECDIR):
 	mkdir -p $(EXECDIR)
+$(LECEVDIR):
+	mkdir -p $(LEXECDIR)
