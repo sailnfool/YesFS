@@ -23,7 +23,7 @@ then
 # directory tree which divides the files into directories so that no
 # single directory will be more than ~100,000 files per directory
 #
-# Directory name uses 2 bytes of the ASCII encoding of the hash name,
+# Directory name uses 4 bytes of the ASCII encoding of the hash name,
 # starting at the most significant bits of the hash name string.
 #
 # File systems with less than 65,536 files (256^2) will have one level
