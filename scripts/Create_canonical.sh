@@ -5,7 +5,17 @@
 # Copyright (C) 2022 Sea2Cloud Storage, Inc. All Rights Reserved
 # Modesto, CA 95356
 #
-# Create the canonical hash lists
+# Create_canonical - Create the canonical hash lists
+#                    Given an initial list of canonical numbers
+#                    and short hash names, generate the following
+#                    lists:
+#                          number to short hash name
+#                          short hash name to number
+#                          short hash name to executable (local)
+#
+#                    Given these lists, generate a function that
+#                    will load these lists into Bash Associative
+#                    arrays for use in a bash script.
 #
 ########################################################################
 #_____________________________________________________________________
