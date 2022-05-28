@@ -34,7 +34,6 @@ then
 	source func.errecho
 	source func.regex
 	source func.debug
-	source func.hex2dec
 	
 	canonical_source=${HOME}/github/YesFS/etc/export.csv
 	canonical_dir=${canonical_source%/*}
@@ -103,7 +102,7 @@ then
 	    fi
 			;;
 		v)
-	    if [[ "${verbse}" = "FALSE" ]]
+	    if [[ "${verbose}" = "FALSE" ]]
 			then
 	      verbose="TRUE"
 	    else
@@ -122,23 +121,31 @@ then
 	done
 	shift "$(($OPTIND - 1))"
 
-  if [[ "$#" -ge 0 ]]
+  if [[ "$#" -gt 0 ]]
   then
 	  filename="$1"
 		if [ ! -f "${filename}" ]
 		then
 			echo "filename=${filename} is not a file"
+      echo "parameters $@"
 			exit 1
 		fi
+	  canonical_source=${filename}
+	  canonical_dir=${canonical_source%/*}
   fi
-	canonical_source=${filename}
-	canonical_dir=${canonical_source%/*}
 	
   for i in num2bin num2hash num2bits hash2num
   do
-    if [[ -r ${canonical_dir}/${i}.csv ]]
+    if [[ "${i}" = num2bin ]]
     then
-      rm -f ${canonical_dir}/${i}.csv
+      subdir=$(hostname)
+      mkdir -p ${canonical_dir}/${subdir}
+    else
+      subdir=""
+    fi
+    if [[ -r ${canonical_dir}/${subdir}/${i}.csv ]]
+    then
+      rm -f ${canonical_dir}/${subdir}/${i}.csv
     fi
   done
 	cut --fields=1-3 ${canonical_source} | \
@@ -152,35 +159,51 @@ then
 	  then
 	    continue
 	  fi
-	  num2hash[$(func_hex2dec ${hashnumber})]=${hashshortname}
-	  hash2num[$"{hashshortname}"]=${hashnumber}
-	  num2bits[$(func_hex2dec ${hashnumber})]=${hashbits}
+#    echo "DEBUG=num2hash[${hashnumber}]=${hashshortname}"
+    num2hash[${hashnumber}]=${hashshortname}
+    # echo ${num2hash[${hashnumber}]}
+	  hash2num["${hashshortname}"]=${hashnumber}
+#	  echo "DEBUG=num2bits[${hashnumber}]=${hashbits}"
+	  num2bits[${hashnumber})]=${hashbits}
+	  # echo ${num2bits[${hashnumber})]}
 	  if [[ "${verbose}" = "TRUE" ]]
 	  then
 	    echo -e "${hashnumber}\t${hashshortname}\t${hashbits}"
 	  fi
 	  if [[ $(which ${hashshortname}) ]]
 	  then
-	    num2bin[$(func_hex2dec ${hashnumber})]=$(which ${hashshortname})
-      echo "${hashnumber}\t${hashshortname}" >> ${canonical_dir}/num2bin.csv
+#	    echo "DEBUG=num2bin[${hashnumber}]=$(which ${hashshortname})"
+	    num2bin[${hashnumber}]=$(which ${hashshortname})
+      subdir=$(hostname)
+      echo "${hashnumber}\t${hashshortname}" >> \
+        ${canonical_dir}/${subdir}/num2bin.csv
 	    if [[ "${verbose}" = "TRUE" ]]
 	    then
 	      echo "Found ${hashshortname}"
 	    fi
 	  else
-	    num2bin[$(func_hex2dec ${hashnumber})]=""
+	    num2bin[${hashnumber}]=""
 	  fi
-    echo "${hashnumber}\t${hashshortname}" >> ${canonical_dir}/num2hash.csv
-    echo "${hashshortname}\t${hashnumber}" >> ${canonical_dir}/hash2num.csv
+    echo "${hashnumber}\t${hashshortname}" >> \
+      ${canonical_dir}/num2hash.csv
+    echo "${hashshortname}\t${hashnumber}" >> \
+      ${canonical_dir}/hash2num.csv
     echo "${hashnumber}\t${hashbits}" >> ${canonical_dir}/num2bits.csv
 	done
 
   for i in num2bin num2hash num2bits hash2num
   do
-    if [[ -r ${canonical_dir}/${i}.csv ]]
+    if [[ "${i}" = num2bin ]]
     then
-      sort ${canonical_dir}/${i}.csv >> /tmp/copy$$_${i}.csv
-      mv /tmp/copy$$_${i}.csv ${canonical_dir}/${i}.csv
+      subdir=$(hostname)
+      mkdir -p ${canonical_dir}/${subdir}
+    else
+      subdir=""
+    fi
+    if [[ -r ${canonical_dir}/${subdir}/${i}.csv ]]
+    then
+      sort ${canonical_dir}/${subdir}/${i}.csv >> /tmp/copy$$_${i}.csv
+      mv /tmp/copy$$_${i}.csv ${canonical_dir}/${subdir}/${i}.csv
     fi
   done
   export num2hash
