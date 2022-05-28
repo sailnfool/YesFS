@@ -1,9 +1,9 @@
-.PHONY: all install
+.PHONY: all linstall
 .ONESHELL:
-all: install
-install:
+all: linstall
+linstall:
 	cd scripts
-	make uninstall install
+	make uninstall linstall
 	cd ..
 uninstall:
 	cd scripts

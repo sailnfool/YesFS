@@ -4,7 +4,8 @@ LPREFIX?=$(HOME)/.local
 .sh:
 	@rm -f $@
 	cp $< $@
-LINSTALL = yfunc.create_spec_backref \
+LINSTALL = yfunc.create_canonical \
+		yfunc.create_spec_backref \
 		yfunc.maketop \
 	  yfunc.hashdirpath \
 		yfunc.create_spec_backref \
@@ -16,26 +17,26 @@ LINSTALL = yfunc.create_spec_backref \
 EXECDIR := $(PREFIX)/bin
 LEXECDIR := $(LPREFIX)/bin
 
-.PHONY: clean install uninstall all
-all: $(LINSTALL) $(INSTALL)
-	make uninstall install
+.PHONY: clean linstall uninstall all
+all: $(LINSTALL)
+	make uninstall linstall
 
-install: $(INSTALL)
-	mkdir -p $(EXECDIR)
-	install -o $(USER) -C $? $(EXECDIR)
-	rm -f $?
+# install: $(INSTALL)
+# 	mkdir -p $(EXECDIR)
+# 	install -o $(USER) -C $? $(EXECDIR)
+# 	rm -f $?
 linstall: $(LINSTALL)
 	mkdir -p $(LEXECDIR)
 	install -o $(USER) -c $? $(LEXECDIR)
 	rm -f $?
 clean: 
-	@for execfile in $(INSTALL) $(LINSTALL); do \
+	@for execfile in $(LINSTALL); do \
 		echo rm -f $$execfile; \
 		rm -f $$execfile; \
 	done
 
 uninstall: 
-	@for execfile in $(INSTALL); do \
+	@for execfile in $(LINSTALL); do \
 		echo rm -f $(EXECDIR)/$$execfile; \
 		rm -f $(EXECDIR)/$$execfile; \
 	done
