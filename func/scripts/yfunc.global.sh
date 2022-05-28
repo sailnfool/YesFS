@@ -12,31 +12,48 @@ then
 # files in the form of <hashname>.<suffix> where hashname is the
 # cryptographic hash of the chunk with which metadata is defined.
 # Suffix is the abbreviation for the metadata structure which holds
-# information about the chunk. A file that is simply <hashname>, a 128
-# ASCII HEX encoded name for a 256-bit {8 byte} cryptographic hash.
+# information about the chunk. A file that is simply <hashname> is
+# the entire actual file without splitting it into chunks.
+# 
+# Given that we have adopted the canonical representation of the 
+# cryptographic hash codes, the ASCII HEX encoded name of each
+# hash is <CANONICAL_HASH_NUMBER><HEX Encoded Cryptographic Hash>
+# Where:
+#       <CANONICAL_HASH_NUMER>:=[0-9a-fA-F]{3}
+# Eventually the following files will be looked up as objects in the
+# YesFS file system.  The human readable names and descriptions of the
+# files are as follows:
+#
+# ${YesFS}/num2hash.csv     The list of canonical codes and the
+#                           canonical short name of the cryptographic
+#                           hash
+# ${YesFS}/num2bits.csv     The list of the number of bits created by
+#                           using the canonical hash
+# ${YesFS}/hash2num.csv     The inverse list of num2hash sorted by
+#                           the short hash name
+# ${YesFS}/hostname/num2bin.csv  The list of locations on the hostname
+#                           where the executable copies of canonical
+#                           cryptographic codes are found.  If there
+#                           is no entry, then there is no available
+#                           executable
 #
 # The file system information is stored in a directory similar to the
 # "tank" of ZFS.  The default root is a named root and is YesFS if not
 # otherwise specified.
 #
-# In order to keep directories from growing too large, there is a
-# directory tree which divides the files into directories so that no
-# single directory will be more than ~100,000 files per directory
-#
-# Directory name uses 4 bytes of the ASCII encoding of the hash name,
-# starting at the most significant bits of the hash name string.
-#
-# File systems with less than 65,536 files (256^2) will have one level
-# of directories.  File systems with less than 16,777,216 files will
-# have two levels of directories.  Files systems with less
-# than 4,294,967,296 files (256^4) with have three levels of
-# directories... and so on.
+# Directory name uses the most significant 4 bytes of the ASCII
+# encoding of the hash name.
+# These directories will be present on the local file system as
+# caches of the files that were created from this host.  Each of these
+# directories corresponds to a "Flexhash" row which may be replicated
+# by 3 or more servers (a single server may support more than one
+# hash row).
 #
 # At the time that a chunk is created, the name, the type and the name
 # of the cryptographic hash function are logged in the CHUNKLOG
 #
 ########################################################################
-export YesFS=/home/rnovak/DropboxYesFS
+export YesFS=/home/rnovak/Dropbox/YesFS
 export HASHES=${YESFS}/.hash
 export CHUNKLOG=${YESFS}/.chunklog
 export FAILEDTOHASH_string="Failed to hash \`"
@@ -51,6 +68,7 @@ export FILECOUNT_file="${YESFS}/FILECOUNT.file"
 # as specified in "man date" the ISO format with nanosecond resolution
 # is requested.
 #
+# Not sure what I had in mind when I wrote the following three lines?
 # By removing the '\' at the beginning of the string
 # this would become a single timestamp for all elements
 # of the object creation, which may be desirable.
@@ -64,15 +82,33 @@ timestamp="\$(date -u -Ins)"
 # of each known and support cryptographic hash type.
 #
 # The files used to create these arrays are documented in
-# Create_canonical.sh
+# yfunc.create_canonical.sh
 ########################################################################
-declare -a num2hash
+declare -A num2hash
 declare -A hash2num
-declare -A hash2bin
-declare -a num2bits
+declare -A num2bin
+declare -A num2bits
 
-b2len=128
-b2file=130
+########################################################################
+# hashoffset is the offset in the hashid array after the 4 character
+# canonical hash ID
+########################################################################
+export hashoffset=4
+export flexhashrows=$(($(func_hex2dec "FFFF") + 1 ))
+export flexdirchars=4
+
+########################################################################
+# Initialize the arrays
+########################################################################
+#$(yfunc.create_canonical)
+
+########################################################################
+# Select the default cryptographic hash used and the backup hash
+########################################################################
+# default_hash=sha256sum
+# hashid=${hash2num[${default_hash}]}
+# hashbin=${hash2bin[${default_hash}]}
+# hashbits=${num2bits[${hashid}]}
 
 ########################################################################
 # Suffixes
