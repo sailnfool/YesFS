@@ -7,5 +7,5 @@ scripts:
 	cd ..
 func:
 	cd func
-	make uninstall install clean
+	make uninstall linstall clean
 	cd ..
