@@ -1,6 +1,7 @@
 #!/bin/bash
 if [ -z "${__yfunc_hashdirpath}" ]
 then
+  source yfunc.global
 	source yfunc.maketop
 	source func.errecho
 	source func.insufficient
@@ -12,9 +13,8 @@ then
 		yesfsdir="$2"
 
 		maketop "$2"
-		dir=${hashid:0:2}
-		subdir=${hashid:2:2}
-		dirpath=${HASHES}/${dir}/${subdir}
+		dir=${hashid:${hashoffset}:${flexdirchars}}
+		dirpath=${HASHES}/${dir}
 		if [ -z "${dirpath}" ]
 		then
 			errecho "Empty directory"

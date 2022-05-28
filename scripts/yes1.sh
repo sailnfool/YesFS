@@ -15,6 +15,7 @@
 #_____________________________________________________________________
 
 source yfunc.global
+source yfunc.create_canonical
 source yfunc.hashdirpath
 source yfunc.maketop
 source yfunc.put_nhid
@@ -36,6 +37,18 @@ USAGE="${0##*/} [-h] [-d] <file>\n
 \t\t\tToggles the default.  Prints a timestamp\n
 \t\t\tevery 7000 files.\n
 "
+yfunc.create_canonical # Use defaults see yfunc.create_canonical -h
+########################################################################
+# Select the default cryptographic hash used and the backup hash
+########################################################################
+default_hash=sha256sum
+hashid=${hash2num[${default_hash}]}
+hashbin=${hash2bin[${default_hash}]}
+hashbits=${num2bits[${hashid}]}
+hashlen=$((hashbits * 2))
+# b2len=128
+# b2file=130
+
 
 ####################
 # Set up the testing directory and setup for locking the filecount
@@ -75,17 +88,18 @@ do
 	esac
 done
 shift "$(($OPTIND - 1))"
+
 [ $# -lt $NUMARGS ] && { echo -e ${USAGE}; exit -1; }
 
 filename="$1"
 if [ ! -f "${filename}" ]
 then
 	echo "filename=${filename} is not a file"
-	exit 0
+	exit 1
 fi
 
 ####################	
-# nhid   is the name hash ID of the file: NHID Daka $nhid
+# nhid   is the name hash ID of the file: NHID AKA $nhid
 # p_nhid represents the directory path in the local file
 #        system where we will place the NHID object.
 # f_nhid is the full path ${p_nhid}/${nhid}

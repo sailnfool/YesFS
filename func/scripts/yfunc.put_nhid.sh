@@ -18,8 +18,8 @@ then
 # Change all usage of b2sum and its lengh to functions of the 
 # Associative arrays
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~
-		nhidhash="$(echo "${filename}" | b2sum)"
-		nhid=${nhidhash:0:128}
+		nhidhash="$(echo "${filename}" | ${num2bin[${cryptoID}]})"
+    nhid="${cryptoID}:${nhidhash:0:$((${num2bits[${cryptoID}]}*2))}"
 		p_nhid=hashdirpath ${nhid}
 		f_nhid="${p_nhid}/${nhid}"
 
@@ -29,7 +29,7 @@ then
 		fi
 		echo "${filename}" > "${f_nhid}.${SUFFIX[CHID]}"
 
-		echo -e "${nhid}\t$SUFFIX[CHID]}\t${HASHCODE}\t${timestamp}" \
+		echo -e "${nhid}\t$SUFFIX[CHID]}\t${timestamp}" \
 			>> ${CHUNKLOG}
 		backref[0]="HASHTYPE\tBACK"
 		backref[1]="PREVIOUS\t0"
