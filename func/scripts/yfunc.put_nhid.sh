@@ -7,12 +7,17 @@ then
 	export __func_put_nhid=1
 
 	function put_nhid {
-		[ $# -lt 2 ] && insufficient 2 $@
+		[ $# -lt 5 ] && insufficient 5 $@
 		filename="$1"
 		yesfsdir="$2"
 		timestamp="$3"
 		CHUNKLOG="$4"
+    cryptoID="$5"
 		
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~
+# Change all usage of b2sum and its lengh to functions of the 
+# Associative arrays
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~
 		nhidhash="$(echo "${filename}" | b2sum)"
 		nhid=${nhidhash:0:128}
 		p_nhid=hashdirpath ${nhid}
