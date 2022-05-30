@@ -1,0 +1,8 @@
+004\tmd5sum
+008\tsha1sum
+00E\tsha256sum
+010\tsha384sum
+011\tsha512sum
+012\tsha224sum
+01C\tb2sum
+01F\tb3sum

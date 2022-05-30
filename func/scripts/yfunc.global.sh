@@ -4,6 +4,7 @@ then
 	export __yfunc_global=1
 
   source func.regex
+  source func.hex2dec
 
 ########################################################################
 # Global Strings used in YesFS data structures
