@@ -96,7 +96,7 @@ declare -A num2bits
 ########################################################################
 export hashoffset=4
 export flexhashrows=$(($(func_hex2dec "FFFF") + 1 ))
-export flexdirchars=4
+export flexdirchars=$((${hashoffset}+4 ))
 
 ########################################################################
 # Initialize the arrays
@@ -111,25 +111,103 @@ export flexdirchars=4
 # hashbin=${hash2bin[${default_hash}]}
 # hashbits=${num2bits[${hashid}]}
 
+declare -A NHID
+NHID["CHUNKTYPE"]="NHID" # The name of this chunk type
+NHID["objmani"]="" # Hash of the object manifest that the name refers
+                   # to
+NHID["namemeta"]="" # Hash of hte nam-affiliated metadata (e.g.,
+                    # owner, group, permissions
+NHID["fullname"]="" # Full pathname of the object as a NUL terminated
+                    # string
+declare -A NAMEMETA
+NAMEMETA["CHUNKTYPE"]="NAMEMETA" #The name of this chunk type
+NAMEMETA["ownerid"]="" # Owner UserID# typically > 2000 for 
+                       # unprivileged users
+NAMEMETA["groupid"]="" # Owner GroupID# typically > 2000 for 
+                       # unprivileged users
+NAMEMETA["perm"]="" # SetUserID, Set GroupID, Owner, Group, World
+                    # RWX permissions
+NAMEMETA["next"]="" # Hash to the next name-affiliated metadata chunk
+declare -A BACKR
+BACKR["CHUNKTYPE"]="BACKREFERENCE"
+BACKR["name"]="" # Name HashID of the first name that refers to this
+                 # object
+BACKR["ctime"]="" # Time Stamp When Backreference was created in 
+                  # seconds since Epoch
+BACKR["speculative"] # Speculative Back Reference
+BACKR["next"] # Hash of the next back reference
+BACKR["prev"] # Hash of the previous back reference
+declare -A CHUNKACC
+CHUNKACC["CHUNKTYPE"]="CHUNKACC" # The name of this chunk type
+CHUNKACC["prev"]="" # The hash of the previous access time record for
+                    # the chunk
+CHUNKACC["atime"]="" # Most recent access time for the chunk
+CHUNKACC["ownerid"]="" # Owner UserID# typically > 2000 for
+                       # unprivileged users
+CHUNKACC["groupid"]="" # Owner GroupID# typically > 2000 for 
+                       # unprivileged users
+CHUNKACC["perm"]="" # SetUserID, Set GroupID, Owner, Group, World
+                    # RWX permissions
+declare -A MANI
+MANI["CHUNKTYPE"]="MANIFEST" # The name of this type of chunk
+MANI["prevmani"]="" # The hash of the previous Manifest for this object
+MANI["back"]="" # The hash of the back reference chain
+MANI["objlen"]="" # The length (in bytes) of the object, 128 bit integer
+MANI["ctime"]="" # The creation time of the object (hash of the
+                 # metadata?)
+MANI["hash0"]="" # The hash of the first chunk of the object
+MANI["off0"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash1"]="" # The hash of the first chunk of the object
+MANI["off1"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash2"]="" # The hash of the first chunk of the object
+MANI["off2"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash3"]="" # The hash of the first chunk of the object
+MANI["off3"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash4"]="" # The hash of the first chunk of the object
+MANI["off4"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash5"]="" # The hash of the first chunk of the object
+MANI["off5"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash6"]="" # The hash of the first chunk of the object
+MANI["off6"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+MANI["hash7"]="" # The hash of the first chunk of the object
+MANI["off7"]="" # the offset of the first chunk (may be non-zero for
+                 # sparse data)
+declare -A CHUNKMETA
+CHUNKMETA["CHUNKTYPE"]="CHUNKMETA" # The name of this type of object
+CHUNKMETA["atime"]="" # The most recent chunk access time
+CHUNKMETA["next"]="" # The hash of the previous access time chunkmeta
+                     # chunkmeta chunk
+CHUNKMETA["meta"]="" # hash to other chunk affiliated metadata as of
+                     # this time
+
+
+
 ########################################################################
 # Suffixes
 ########################################################################
   # Chunk Hash ID, normally elided, absence implies this
-export CHID=1
+export sufCHID=1
   # Name Hash ID
-export NHID=2
+export sufNHID=2
   # Meta data affiliated with a chunk
-export META=3
+export sufMETA=3
   # A back reference for a chunk.  These are speculative or confirmed
-export BACK=4
+export sufBACK=4
   # A Manifest for an object
-export MANI=5
+export sufMANI=5
   # Chunk Meta data
-export CHUNKMETA=6
+export sufCHUNKMETA=6
   # Chunk Access data
-export CHUNKACCESS=7
+export sufCHUNKACCESS=7
   # Chunk Manifest
-export CHUNKMANI=8
+export sufCHUNKMANI=8
   # Name metadata
 export NAMEMETA=9
 
@@ -175,9 +253,12 @@ MANIFEST="MANIFEST"	# Hash of the object manifest that the name
 ########################################################################
 # CHUNKMETA Metadata for a Chunk
 ########################################################################
-SUFFIX[${CHUNKMETA}]="CHUNKMETA"
-HASHTYPE="HASHTYPE"	# The internal identifier of this chunk as
-			# meta-type VALUE = "CHUNKMETA"
+SUFFIX[${sufCHUNKMETA}]="CHUNKMETA"
+declare -A CHUNKMETA
+
+CHUNKMETA[CHUNKMETAtime]=${timestamp}
+CHUNKMETA[CHUNKMETAnext]=""
+CHUNKMETA[CHUNKMETAmeta]="DUMMY"
 SIZE="SIZE"		# The size of the chunk in bytes
 BACKREF="BACKREF"	# The hashid of the most recent backreference
 			# to the chunk
