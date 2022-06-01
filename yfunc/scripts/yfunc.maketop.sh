@@ -1,31 +1,50 @@
 #!/bin/bash
+########################################################################
+# Author: Robert E. Novak
+# email: sailnfool@gmail.com
+# Copyright (C) 2022 Sea2Cloud Storage, Inc. All Rights Reserved
+# Modesto, CA 95356
+#
+# Create the top level directories used by the YesFS filesystem.
+# There are two directories,
+# 1) the .hash directory YesFS_HASHES which contains all of the objects 
+#    (files, directories, manifests, etc.
+# 2) the .chunklog YesFS_CHUNKLOG that contains a trail of every 
+#    chunk created.
+########################################################################
+#_____________________________________________________________________
+# Rev.|Auth.| Date     | Notes
+#_____________________________________________________________________
+# 1.0 | REN |06/01/2022| original version
+#_____________________________________________________________________
+#
+
 if [ -z "${__yfunc_maketop}" ]
 then
 	export __yfunc_maketop=1
+  source func.errecho
 
 	function maketop {
-		YesFSdir=$1
-		TMPTOP="/tmp"
-		YTMPDIR="${TMPTOP}/${YesFSdir##*/}.$$.dir"
-		HASHES="${YesFSdir}/.hash"
-		CHUNKLOG="${YesFSdir}/.chunklog"
-		if [ ! -d "${YTMPDIR}" ]
+    if [[ ! -d "$1" ]]
+    then
+      errecho "maketop passed a non-directory parameter"
+      exit 1
+    fi
+    YesFSdir=realpath("$1")
+		YesFS_HASHES="${YesFSdir}/.hash"
+		YesFS_CHUNKLOG="${YesFSdir}/.chunklog"
+		if [ ! -d "${YesFS_HASHES}" ]
 		then
-			mkdir -p ${YTMPDIR}
-			chmod 777 ${YTMPDIR}
+			mkdir -p ${YesFS_HASHES}
+			chmod 777 ${YesFS_HASHES}
 		fi
-		if [ ! -d "${HASHES}" ]
+		if [ ! -d "${YesFS_CHUNKLOG}" ]
 		then
-			mkdir -p ${HASHES}
-			chmod 777 ${HASHES}
-		fi
-		if [ ! -d "${CHUNKLOG}" ]
-		then
-			mkdir -p ${CHUNKLOG}
-			chmod 777 ${CHUNKLOG}
+			mkdir -p ${YesFS_CHUNKLOG}
+			chmod 777 ${YesFS_CHUNKLOG}
 		fi
 		
-		export TMPTOP YTMPDIR HASHES CHUNKLOG
+		export YesFS_HASHES YesFS_CHUNKLOG
 	}
 	export maketop
 fi # if [-z "${__yfunc_maketop}" ]
