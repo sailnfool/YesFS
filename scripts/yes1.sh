@@ -41,7 +41,7 @@ yfunc.create_canonical # Use defaults see yfunc.create_canonical -h
 ########################################################################
 # Select the default cryptographic hash used and the backup hash
 ########################################################################
-default_hash=sha256sum
+default_hash=b2sum
 hashid=${hash2num[${default_hash}]}
 hashbin=${hash2bin[${default_hash}]}
 hashbits=${num2bits[${hashid}]}
