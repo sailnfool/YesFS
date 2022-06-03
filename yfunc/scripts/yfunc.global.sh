@@ -187,7 +187,10 @@ CHUNKMETA["next"]="" # The hash of the previous access time chunkmeta
 CHUNKMETA["meta"]="" # hash to other chunk affiliated metadata as of
                      # this time
 
-
+########################################################################
+# The number of bits encoded by a hex digit
+########################################################################
+hexbits=4
 
 ########################################################################
 # Suffixes
