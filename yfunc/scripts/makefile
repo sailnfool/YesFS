@@ -5,11 +5,13 @@ LPREFIX?=$(HOME)/.local
 	@rm -f $@
 	cp $< $@
 LINSTALL = yfunc.create_canonical \
-		yfunc.create_spec_backref \
 		yfunc.maketop \
 	  yfunc.hashdirpath \
-		yfunc.create_spec_backref \
+		yfunc.put_backr\
+		yfunc.put_chunk \
 		yfunc.put_first_backref \
+		yfunc.put_mani \
+		yfunc.put_namemeta \
 		yfunc.put_nhid \
 	  yfunc.global
 
