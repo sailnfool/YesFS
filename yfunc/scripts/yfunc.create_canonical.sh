@@ -170,6 +170,11 @@ then
 	  then
 	    echo -e "${hashnumber}\t${hashshortname}\t${hashbits}"
 	  fi
+    num2hexdigits[${hashnumber}]=$((${hashbits]/${hexbits}))
+	  if [[ "${verbose}" = "TRUE" ]]
+	  then
+	    echo -e "${hashnumber}\t${hashshortname}\t${num2hexdigits[${hashnumber}]}"
+	  fi
 	  if [[ $(which ${hashshortname}) ]]
 	  then
 #	    echo "DEBUG=num2bin[${hashnumber}]=$(which ${hashshortname})"
@@ -184,14 +189,16 @@ then
 	  else
 	    num2bin[${hashnumber}]=""
 	  fi
-    echo "${hashnumber}\t${hashshortname}" >> \
+    echo -e "${hashnumber}\t${hashshortname}" >> \
       ${canonical_dir}/num2hash.csv
-    echo "${hashshortname}\t${hashnumber}" >> \
+    echo -e "${hashshortname}\t${hashnumber}" >> \
       ${canonical_dir}/hash2num.csv
-    echo "${hashnumber}\t${hashbits}" >> ${canonical_dir}/num2bits.csv
+    echo -e "${hashnumber}\t${hashbits}" >> ${canonical_dir}/num2bits.csv
+    echo -e "${hashnumber}\t${num2hexdigits[${hashnumber}]}" >> \
+      ${canonical_dir}num2hexdigits.csv
 	done
 
-  for i in num2bin num2hash num2bits hash2num
+  for i in num2bin num2hash num2bits hash2num num2hexdigits
   do
     if [[ "${i}" = num2bin ]]
     then
@@ -210,4 +217,5 @@ then
   export hash2num
   export num2bits
   export num2bin
+  export num2hexdigits
 fi #if [[ -z "${__yfunc_create_canonical}" ]]
