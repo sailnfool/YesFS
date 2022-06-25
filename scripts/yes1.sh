@@ -37,32 +37,48 @@ USAGE="${0##*/} [-h] [-d] <file>\n
 \t\t\tToggles the default.  Prints a timestamp\n
 \t\t\tevery 7000 files.\n
 "
-yfunc.create_canonical # Use defaults see yfunc.create_canonical -h
-########################################################################
-# Select the default cryptographic hash used and the backup hash
-########################################################################
-default_hash=b2sum
-hashid=${hash2num[${default_hash}]}
-hashbin=${hash2bin[${default_hash}]}
-hashbits=${num2bits[${hashid}]}
-hashlen=$((hashbits * 2))
-# b2len=128
-# b2file=130
 
+########################################################################
+# Set up the global key/value objects for the cryptographic hash
+# functions and load the associative arrays with those key/values
+########################################################################
+yfunc_create_canonical # Use defaults see yfunc.create_canonical -h
 
-####################
+########################################################################
+# Select the default cryptographic hash used
+########################################################################
+defaulthash=b2sum
+if [[ ! ${hash2num[${defaulthash}]+_} ]]
+then
+  errecho ${FUNCNAME} ${LINENO} "${defaulthash} not found for" \
+    "hash2num array"
+  exit 1
+fi
+cryptoID=${hash2num[${defaulthash}]}
+
+if [[ ! ${num2bin[${cryptoID}]+_} ]]
+then
+  errecho ${FUNCNAME} ${LINENO} "No executable found in num2bin " \
+    "for ${cryptoID}"
+  exit 1
+fi
+hashbinary=${num2bin[${cryptoID}]}
+hashbits=${num2bits[${cryptoID}]}
+hashlen=${num2hexdigits[${cryptoID}]}
+
+########################################################################
 # Set up the testing directory and setup for locking the filecount
-####################
+########################################################################
 func_setuplocks
 
-####################
+########################################################################
 # environmental and script dependent variables.
-####################
+########################################################################
 optionargs="hdv"
 NUMARGS=1
 debug=0
 verbose=1
-YesFSdir=${YesFSdir:="/hashes"}
+YesFSdir=${YesFSdir:="~/Dropbox/.hashes"}
 
 while getopts ${optionargs} name
 do
@@ -87,9 +103,9 @@ do
 		;;
 	esac
 done
-shift "$(($OPTIND - 1))"
+shift "$((${OPTIND} - 1))"
 
-[ $# -lt $NUMARGS ] && { echo -e ${USAGE}; exit -1; }
+[ $# -lt ${NUMARGS} ] && { echo -e ${USAGE}; exit -1; }
 
 filename="$1"
 if [ ! -f "${filename}" ]
@@ -98,7 +114,7 @@ then
 	exit 1
 fi
 
-####################	
+########################################################################
 # nhid   is the name hash ID of the file: NHID AKA $nhid
 # p_nhid represents the directory path in the local file
 #        system where we will place the NHID object.
@@ -110,39 +126,43 @@ fi
 # the objects exist in the full path, but add appropriate sub
 # directories and at the last element add the filename as a
 # member of the leaf/edge directory.
-####################	
+########################################################################
 nhid=$(put_nhid "${filename}" "${YesFSdir}" "${timestamp}" \
-    "${CHUNKLOG}")
+    "${CHUNKLOG}" ${cryptoID})
 
-FILECOUNT=$(func_nextgetcounter "${FILECOUNT.lock}" \
+FILECOUNT=$(func_getnextcounter "${FILECOUNT.lock}" \
   "${FILECOUNT.file}" )
 p_nhid=$(hashdirpath ${nhid})
 f_nhid="${p_nhid}/${nhid}"
 
-####################	
+########################################################################
 # Get the content hash ID of the file: CHID
 # and the filename
-####################	
-chid=${hashline:0:128}
+#
+# ${num2bin[${cryptoID}] is the short name of the function which
+# performs the hash algorithm designated by ${cryptoID}
+########################################################################
+chidhash=$(${num2bin[${cryptoID}]} ${filename})
+chid="${cryptoID}:${chidhash:0:${num2hexdigits[${cryptoID}]}}"
 p_chid=$(hashdirpath ${chid})
-f_chid="${p_chid}/${chid}"
-
-bhid=$(put_firstbackref ${nhid})
-if [ -f "${f_chid}" ]
-then
-	previous_chid=""
-fi
-####################	
+f_chid="${p_chid}/${chid}.chid"
+CHID["chunktype"]="chid"
+CHID["mani"]=""
+CHID["back"]=${nhid}
+p_mani #~!~!~!~!~! 
+########################################################################
 # This next step should be the process that breaks
 # the file into multiple chunks and ties each of those
 # chunks back to the nhid as they are created, building
 # the basis for the chunk list that is at the end of
 # the manifest for the object.  For now we simplify
 # by turning the object into a single chunk.
-####################
-chunk_mani[0]=echo -e "${HASHTYPE}\t${SUFFIX[MANI]}"
-chunk_mani[1]=echo -e "${PREVIOUS}\t0"
-chunk_mani[2]=echo -e "${BACKREF}\t${bhid}"
+########################################################################
+MANI["chunktype"]="manifest"
+if [[ -r ${f_chid} ]]
+then
+ # MANI["prevmani"
+fi
 
 
 CHUNKID="${f_chid}.CHID"
@@ -182,19 +202,19 @@ do
 done
 fi
 
-####################	
+########################################################################
 # Create the speculative backreference that ties the
 # name to the chunk.
-####################	
+########################################################################
 create_spec_back_ref ${chid} ${nhid}
 
-####################	
+########################################################################
 # See hashdirpath to see how the directories
 # are setup as prefixes for the hash names
 # Set the Path for the NHID
 # The Manifest has the suffix .MANIFEST
 # The object containing the file name has the suffix .NHID
-####################
+########################################################################
 p_nhid=$(hashdirpath ${nhid})
 manid=${p_nhid}/${nhid}.MANIFEST
 fullnhid=${p_nhid}/${nhid}.NHID
@@ -202,21 +222,21 @@ ldir="${filename%/*}"
 mkdir -p "${YesFSdir}/${ldir}"
 echo "${nhid}" >> "${YesFSdir}/${filename}"
 
-####################
+########################################################################
 # If the NHID already exists it means we have a prior
 # version of this name.
-####################
+########################################################################
 if [ -r ${fullnhid} ]
 then
 
-	####################
+  ######################################################################
 	# A prior NHID means a prior MANIFEST  a safety
 	# check here would be a good idea.
 	# Take the hash of the prior manifest.  This
 	# hash will be placed in the new MANIFEST.
 	# Retrieve the version number of the object
 	# from the prior manifest
-	####################
+  ######################################################################
 	prevmnidhash=$(b2sum ${manid})
 	prevmnid=${prevmnidhash:0:128}
 	p_mnid=$(hashdirpath ${prevmnid})
@@ -227,19 +247,23 @@ then
 	echo -e "PREVMANIFEST\t${prevmnid}" >${manid}
 else
 
-	####################
+  ######################################################################
 	# First Manifest for the object, set the 
 	# PREVMANIFEST to NULL and the object version
 	# to Zero
-	####################
+  ######################################################################
 	echo -e "PREVMANIFEST\t0" > ${manid}
 	object_version=0
 fi
 
-####################
+########################################################################
+# The code below this point is broken.  Note that the backreference on
+# the object is left speculative until the directory of the parent
+# (containg) directory is updated along with all of its parents.
+########################################################################
 # Fill the Manifest.  This is currently missing the 
 # chunks for the file contents which belongs here.
-####################
+########################################################################
 echo -e "OBJECTVERSION\t${object_version}" >> ${manid}
 echo -e "MANIFESTVERSIONMAJOR\t0" >> ${manid}
 echo -e "MANIFESTVERSIONMINOR\t1" >> ${manid}
@@ -247,21 +271,21 @@ echo -e "NHID\t${chid}\n" >> ${manid}
 echo -e "NAME\t${filename}" >> ${manid}
 [ ${debug} -eq 1 ] && cat ${manid}
 
-####################
+########################################################################
 # Create the NHID with the name and the CHID of the 
 # object contents.
-####################
+########################################################################
 echo -e "NHID\t${chid}\n" >> ${p_nhid}/${nhid}.NHID
 echo -e "NAME\t${filename}" >> ${p_nhid}/${nhid}.NHID
 
-####################
+########################################################################
 # Create a chunk ID for the content chunk that points
 # pack to the name.  This is not correct as instantiated
 # and probably should be dropped as redundant.  Multiple
 # identical files will successively wipe this out.
 # An alternate implementation would be to create a 
 # linked list like the manifests.
-####################
+########################################################################
 p_chid=$(hashdirpath ${chid})
 echo -e "NAME\t${filename}" >> ${p_chid}/${chid}.CHID
 

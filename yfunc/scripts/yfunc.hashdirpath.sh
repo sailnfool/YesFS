@@ -17,7 +17,7 @@
 #_____________________________________________________________________
 #
 
-if [ -z "${__yfunc_hashdirpath}" ]
+if [[ -z "${__yfunc_hashdirpath}" ]]
 then
   source yfunc.global
 	source yfunc.maketop
@@ -25,24 +25,39 @@ then
 	source func.insufficient
 	export __yfunc_hashdirpath=1
 
-	function hashdirpath {
-		[ "$#" -lt 2 ] && insufficient 2 $@
+	function yfunc_hashdirpath {
+		[[ "$#" -lt 2 ]] && insufficient 2 $@
+    if [[ ! "$1" =~ ${re_cryptohash} ]]
+    then
+      errecho -e "First argument is an invalid cryptohash"
+      exit 1
+    fi
 		hashid="$1"
+    if [[ ! -d "$2" ]]
+      errecho -e "Second argument is not a directory"
+      exit 2
+    fi
 		YesFSdir="$2"
 
 		maketop "${YesFSdir}"
 
-    ##################################################################
-    ##################################################################
+    ####################################################################
+    # hashoffset defined in yfunc.global
+    # flexdirchars defined in yfunc.global`
+    ####################################################################
 		dir=${hashid:${hashoffset}:${flexdirchars}}
-		if [ -z "${dir}" ]
+
+    ####################################################################
+    # This should never happen due to the inbound testing.
+    ####################################################################
+		if [[ -z "${dir}" ]]
 		then
 			errecho "Empty directory - bad hash?"
 			exit -1
 		fi
-		dirpath=${YesFS_HASHES}/${dir}
+		dirpath=${YesFSdir}/.hashes/${dir}
 		mkdir -p ${dirpath}
 		echo "${dirpath}"
 	}
-	export hashdirpath
+	export yfunc_hashdirpath
 fi # if [-z "${__yfunc_hashdirpath}" ]

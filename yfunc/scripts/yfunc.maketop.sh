@@ -15,6 +15,7 @@
 #_____________________________________________________________________
 # Rev.|Auth.| Date     | Notes
 #_____________________________________________________________________
+# 1.1 | REN |06/12/2022| Used modern test
 # 1.0 | REN |06/01/2022| original version
 #_____________________________________________________________________
 #
@@ -24,7 +25,7 @@ then
 	export __yfunc_maketop=1
   source func.errecho
 
-	function maketop {
+	function yfunc_maketop {
     if [[ ! -d "$1" ]]
     then
       errecho "maketop passed a non-directory parameter"
@@ -33,18 +34,18 @@ then
     YesFSdir=realpath("$1")
 		YesFS_HASHES="${YesFSdir}/.hash"
 		YesFS_CHUNKLOG="${YesFSdir}/.chunklog"
-		if [ ! -d "${YesFS_HASHES}" ]
+		if [[ ! -d "${YesFS_HASHES}" ]]
 		then
 			mkdir -p ${YesFS_HASHES}
 			chmod 777 ${YesFS_HASHES}
 		fi
-		if [ ! -d "${YesFS_CHUNKLOG}" ]
+		if [[ ! -d "${YesFS_CHUNKLOG}" ]]
 		then
 			mkdir -p ${YesFS_CHUNKLOG}
 			chmod 777 ${YesFS_CHUNKLOG}
 		fi
 		
-		export YesFS_HASHES YesFS_CHUNKLOG
+		export YesFSdir YesFS_HASHES YesFS_CHUNKLOG
 	}
-	export maketop
+	export yfunc_maketop
 fi # if [-z "${__yfunc_maketop}" ]

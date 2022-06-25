@@ -37,6 +37,9 @@ then
 #                           cryptographic codes are found.  If there
 #                           is no entry, then there is no available
 #                           executable
+# ${YesFS}/num2hexdigits.csv This list of the number of hex digits 
+#                           based on the num2bit.csv.  Saves doint the
+#                           math each time.
 #
 # The file system information is stored in a directory similar to the
 # "tank" of ZFS.  The default root is a named root and is YesFS if not
@@ -112,15 +115,18 @@ export flexdirchars=$((${hashoffset}+4 ))
 # hashbits=${num2bits[${hashid}]}
 
 declare -A NHID
-NHID["CHUNKTYPE"]="NHID" # The name of this chunk type
+NHID["chunktype"]="nhid" # The name of this chunk type
 NHID["objmani"]="" # Hash of the object manifest that the name refers
                    # to
-NHID["namemeta"]="" # Hash of hte nam-affiliated metadata (e.g.,
+NHID["namemeta"]="" # HashiD of the name-affiliated metadata (e.g.,
                     # owner, group, permissions
 NHID["fullname"]="" # Full pathname of the object as a NUL terminated
                     # string
+NHID["back"]="" # Pointer to the first back reference to the name
+                # Typically the pointer to the object which is the
+                # hierarchical directry that contains the name.
 declare -A NAMEMETA
-NAMEMETA["CHUNKTYPE"]="NAMEMETA" #The name of this chunk type
+NAMEMETA["chunktype"]="namemeta" #The name of this chunk type
 NAMEMETA["ownerid"]="" # Owner UserID# typically > 2000 for 
                        # unprivileged users
 NAMEMETA["groupid"]="" # Owner GroupID# typically > 2000 for 
@@ -129,7 +135,7 @@ NAMEMETA["perm"]="" # SetUserID, Set GroupID, Owner, Group, World
                     # RWX permissions
 NAMEMETA["next"]="" # Hash to the next name-affiliated metadata chunk
 declare -A BACKR
-BACKR["CHUNKTYPE"]="BACKREFERENCE"
+BACKR["chunktype"]="backreference"
 BACKR["name"]="" # Name HashID of the first name that refers to this
                  # object
 BACKR["ctime"]="" # Time Stamp When Backreference was created in 
@@ -138,7 +144,7 @@ BACKR["speculative"] # Speculative Back Reference
 BACKR["next"] # Hash of the next back reference
 BACKR["prev"] # Hash of the previous back reference
 declare -A CHUNKACC
-CHUNKACC["CHUNKTYPE"]="CHUNKACC" # The name of this chunk type
+CHUNKACC["chunktype"]="chunkacc" # The name of this chunk type
 CHUNKACC["prev"]="" # The hash of the previous access time record for
                     # the chunk
 CHUNKACC["atime"]="" # Most recent access time for the chunk
@@ -149,7 +155,7 @@ CHUNKACC["groupid"]="" # Owner GroupID# typically > 2000 for
 CHUNKACC["perm"]="" # SetUserID, Set GroupID, Owner, Group, World
                     # RWX permissions
 declare -A MANI
-MANI["CHUNKTYPE"]="MANIFEST" # The name of this type of chunk
+MANI["chunktype"]="manifest" # The name of this type of chunk
 MANI["prevmani"]="" # The hash of the previous Manifest for this object
 MANI["back"]="" # The hash of the back reference chain
 MANI["objlen"]="" # The length (in bytes) of the object, 128 bit integer
@@ -180,12 +186,16 @@ MANI["hash7"]="" # The hash of the first chunk of the object
 MANI["off7"]="" # the offset of the first chunk (may be non-zero for
                  # sparse data)
 declare -A CHUNKMETA
-CHUNKMETA["CHUNKTYPE"]="CHUNKMETA" # The name of this type of object
+CHUNKMETA["chunktype"]="chunkmeta" # The name of this type of object
 CHUNKMETA["atime"]="" # The most recent chunk access time
 CHUNKMETA["next"]="" # The hash of the previous access time chunkmeta
                      # chunkmeta chunk
 CHUNKMETA["meta"]="" # hash to other chunk affiliated metadata as of
                      # this time
+declare -A CHID
+CHID["chunktype"]="chid" # The name of this type of object
+CHID["back"]="" # The chunk ID of the first backreference
+CHID["size"]="" # The size in bytes of the chunk
 
 ########################################################################
 # The number of bits encoded by a hex digit

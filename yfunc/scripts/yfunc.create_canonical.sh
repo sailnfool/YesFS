@@ -34,8 +34,46 @@ then
 	source func.errecho
 	source func.regex
 	source func.debug
+
+  function yfunc_create_canonical {
 	
-	canonical_source=${HOME}/github/YesFS/etc/export.csv
+  canonical_source=/tmp/canonical_source$$.csv
+  cat > ${canonical_source} << EOF
+Index	short	Bits	indexCol
+001	md2sum	128
+002	md4sum	128
+003	Havalsum	0
+004	md5sum	128
+005	ripemdsum	0
+006	sha0sum	0
+007	Gostrsum	0
+008	sha1sum	160
+009	tigersum	0
+00A	Ripemd-128sum	128
+00B	Ripemd-160sum	160
+00C	Ripemd-256sum	256
+00D	Ripemd-320sum	320
+00E	sha256sum	256
+00F	sha2sum	256
+010	sha384sum	384
+011	sha512sum	512
+012	sha224sum	224
+013	whirlpool	512
+014	bsum	0
+015	md6sum	0
+016	sha3-224sum	224
+017	sha3-256sum	256
+018	sha3-384sum	384
+019	sha3sum	224
+01A	Shake128sum	256
+01B	Shake256sum	256
+01C	b2sum	512
+01D	Streebogsum	0
+01E	KangarooTwelvesum	0
+01F	b3sum	256
+020	Blake3sum	256
+021 b2psum 256
+EOF
 	canonical_dir=${canonical_source%/*}
 
   USAGE="${0##*/} [-[hv]] [-d <#>] <file>\n
@@ -134,6 +172,10 @@ then
 	  canonical_dir=${canonical_source%/*}
   fi
 	
+  if [[ ! $(which b3sum 2>&1 > /dev/null) ]]
+  then
+    sudo apt-get install b3sum
+  fi
   for i in num2bin num2hash num2bits hash2num
   do
     if [[ "${i}" = num2bin ]]
@@ -218,4 +260,6 @@ then
   export num2bits
   export num2bin
   export num2hexdigits
+}
+export yfunc_create_canonical
 fi #if [[ -z "${__yfunc_create_canonical}" ]]

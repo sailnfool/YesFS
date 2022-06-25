@@ -11,8 +11,8 @@ then
 		filename="$1"
 		yesfsdir="$2"
 		timestamp="$3"
-		CHUNKLOG="$4"
-    cryptoID="$5"
+		chunklog="$4"
+    cryptoid="$5"
 		
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~
 # Change all usage of b2sum and its lengh to functions of the 
@@ -45,25 +45,25 @@ then
     # cryptoID of the hash program, a colon and then the number of
     # character encoded hex characters representing the hash encoding
     ####################################################################
-    nhid="${cryptoID}:${nhidhash:0:${num2hexdigits[${cryptoID}]}}"
+    nhid="${cryptoid}:${nhidhash:0:${num2hexdigits[${cryptoid}]}}"
     p_nhid=$(hashdirpath ${nhid})
 		f_nhid="${p_nhid}/${nhid}"
 
-    NHID["CHUNKTYPE"]="NHID"
+    NHID["chunktype"]="nhid"
     NHID["fullname"]=$(echo $filename)
-    MANI["CHUNKTYPE"]="MANIFEST"
+    MANI["chunktype"]="manifest"
     MANI["prevmani"]=""
-    BACKR["CHUNKTYPE"]="BACKREFERENCE"
+    BACKR["chunktype"]="backreference"
     BACKR["name"]=${f_nhid}
     BACKR["ctime"]="$(date -U -Ins)"
     BACKR["speculative"]="TRUE"
     BACKR["next"]=""
     BACKR["prev"]=""
-    MANI["back"]=$(put_backr ${cryptoID})
+    MANI["back"]=$(put_backr ${cryptoid})
     MANI["objlen"]=$(stat -c "%s" ${filename})
     MANI["ctime"]="$(date -u -Ins)"
-    chunkhash=$(${num2bin[${cryptoID}]} $filename)
-    chid="${cryptoID}:${chunkhash:0:${num2hexdigits[${cryptoID}]}}"
+    chunkhash=$(${num2bin[${cryptoid}]} $filename)
+    chid="${cryptoid}:${chunkhash:0:${num2hexdigits[${cryptoid}]}}"
     p_chid=$(hashdirpath ${chid})
     f_chid="${p_chid}/${chid}"
     cp ${filename} ${f_chid}
@@ -74,13 +74,13 @@ then
       MANI["hash${i}"]=0
       MANI["off${i}"]=0
     done
-    NHID["objmani"]=$(put_mani ${cryptoID})
-    NAMEMETA["CHUNKTYPE"]="NAMEMETA"
+    NHID["objmani"]=$(put_mani ${cryptoid})
+    NAMEMETA["chunktype"]="namemeta"
     NAMEMETA["ownerid"]="$(stat -c "%u" ${filename})"
     NAMEMETA["groupid"]="$(stat -c "$g" ${filename})"
     NAMEMETA["perm"]="$(stat -c "%A" ${filename})"
     NAMEMETA["next"]=""
-    NHID["namemeta"]="$(put_namemeta ${cryptoID})"
+    NHID["namemeta"]="$(put_namemeta ${cryptoid})"
     echo "${nhid}"
 	}
 	export put_nhid
