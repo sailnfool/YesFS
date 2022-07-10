@@ -7,6 +7,22 @@ then
 	export __func_put_nhid=1
 
 	function put_nhid {
+
+    local filename
+    local yesfsdir
+    local timestamp
+    local chunklog
+    local cryptoid
+    local nhidhash
+    local nhid
+    local p_nhid
+    local f_nhid
+    local chunkhash
+    local chid
+    local p_chid
+    local f_chid
+    local i
+
 		[ $# -lt 5 ] && insufficient 5 $@
 		filename="$1"
 		yesfsdir="$2"
@@ -69,7 +85,7 @@ then
     cp ${filename} ${f_chid}
     MANI["hash0"]="${chid}"
     MANI["off0"]=0
-    for i in $(sed 1 7)
+    for i in $(seq 1 7)
     do
       MANI["hash${i}"]=0
       MANI["off${i}"]=0

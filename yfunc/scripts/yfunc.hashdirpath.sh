@@ -26,6 +26,11 @@ then
 	export __yfunc_hashdirpath=1
 
 	function yfunc_hashdirpath {
+
+    local hashid
+    local YesFSdir
+    local dirpath
+
 		[[ "$#" -lt 2 ]] && insufficient 2 $@
     if [[ ! "$1" =~ ${re_cryptohash} ]]
     then

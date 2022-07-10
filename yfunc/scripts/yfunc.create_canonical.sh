@@ -12,52 +12,6 @@ scriptname=${0##/*}
 #                    lists:
 #                          number to short hash name
 #                          short hash name to number
-#                          number to executable (local)
-#                          number to number of bits generated
-#
-#                    Given these lists, generate a function that
-#                    will load these lists into Bash Associative
-#                    arrays for use in a bash script.
-#
-########################################################################
-#_____________________________________________________________________
-# Rev.|Aut| Date     | Notes
-#_____________________________________________________________________
-# 1.0 |REN|53/26/2022| original version
-#_____________________________________________________________________
-
-if [[ -z "${__yfunc_create_canonical}" ]]
-then
-  export __yfunc_create_canonical=1
-
-	source yfunc.global
-	source func.errecho
-	source func.regex
-	source func.debug
-
-  function yfunc_create_canonical {
-	
-  canonical_source=/tmp/canonical_source$$.csv
-  cat > ${canonical_source} << EOF
-Index	short	Bits	indexCol
-001	md2sum	128
-002	md4sum	128
-003	Havalsum	0
-004	md5sum	128
-005	ripemdsum	0
-006	sha0sum	0
-007	Gostrsum	0
-008	sha1sum	160
-009	tigersum	0
-00A	Ripemd-128sum	128
-00B	Ripemd-160sum	160
-00C	Ripemd-256sum	256
-00D	Ripemd-320sum	320
-00E	sha256sum	256
-00F	sha2sum	256
-010	sha384sum	384
-011	sha512sum	512
-012	sha224sum	224
 013	whirlpool	512
 014	bsum	0
 015	md6sum	0
@@ -74,6 +28,20 @@ Index	short	Bits	indexCol
 020	Blake3sum	256
 021 b2psum 256
 EOF
+
+  local canonical_source
+  local canonical_dir
+  local USAGE
+  local VERBOSE_USAGE
+  local optionargs
+  local NUMARGS
+  local FUNC_DEBUG
+  local verbosemode
+  local name
+  local filename
+  local subdir
+  local i
+
 	canonical_dir=${canonical_source%/*}
 
   USAGE="${0##*/} [-[hv]] [-d <#>] <file>\n
@@ -110,20 +78,25 @@ EOF
 	######################################################################
 	optionargs="hdv"
 	NUMARGS=1
-	debug=0
-	verbose="FALSE"
+	FUNC_DEBUG=${DEBUGOFF}
+	verbosemode="FALSE"
 	
 	######################################################################
 	# default defined in yfunc.global (should be the same)
 	######################################################################
-	YesFS=${YesFS:-/home/rnovak/dropbox/YesFS}
+	YesFS=${YesFS:-/home/rnovak/Dropbox/YesFS}
+  if [[ ! -d ${YesFS} ]]
+  then
+    YesFS=/tmp/YesFS
+  fi
+  mkdir -p ${YesFS}
 	
 	while getopts ${optionargs} name
 	do
 		case ${name} in
 		h)
 			echo -e ${USAGE}
-	    if [[ "${verbose}" = "TRUE" ]]
+	    if [[ "${verbosemode}" = "TRUE" ]]
 	    then
 	      echo -e ${VERBOSE_USAGE}
 	    fi
@@ -132,7 +105,7 @@ EOF
 		d)
 	    if [[ "${OPTARG}" =~ $re_digit ]]
 	    then
-	      debug="${OPTARG}"
+	      FUNC_DEBUG="${OPTARG}"
 	    else
 	      errecho -e "-d requires a single digit"
 	      echo -e ${USAGE}
@@ -140,13 +113,13 @@ EOF
 	    fi
 			;;
 		v)
-	    if [[ "${verbose}" = "FALSE" ]]
+	    if [[ "${verbosemode}" = "FALSE" ]]
 			then
-	      verbose="TRUE"
+	      verbosemode="TRUE"
 	    else
-	    	if [[ "${verbose}" = "TRUE" ]]
+	    	if [[ "${verbosemode}" = "TRUE" ]]
 	      then
-				  verbose="FALSE"
+				  verbosemode="FALSE"
 	      fi
 	    fi
 			;;
@@ -201,19 +174,13 @@ EOF
 	  then
 	    continue
 	  fi
-#    echo "DEBUG=num2hash[${hashnumber}]=${hashshortname}"
-    num2hash[${hashnumber}]=${hashshortname}
-    # echo ${num2hash[${hashnumber}]}
-	  hash2num["${hashshortname}"]=${hashnumber}
-#	  echo "DEBUG=num2bits[${hashnumber}]=${hashbits}"
-	  num2bits[${hashnumber})]=${hashbits}
 	  # echo ${num2bits[${hashnumber})]}
-	  if [[ "${verbose}" = "TRUE" ]]
+	  if [[ "${verbosemode}" = "TRUE" ]]
 	  then
 	    echo -e "${hashnumber}\t${hashshortname}\t${hashbits}"
 	  fi
     num2hexdigits[${hashnumber}]=$((${hashbits]/${hexbits}))
-	  if [[ "${verbose}" = "TRUE" ]]
+	  if [[ "${verbosemode}" = "TRUE" ]]
 	  then
 	    echo -e "${hashnumber}\t${hashshortname}\t${num2hexdigits[${hashnumber}]}"
 	  fi
@@ -224,7 +191,7 @@ EOF
       subdir=$(hostname)
       echo "${hashnumber}\t${hashshortname}" >> \
         ${canonical_dir}/${subdir}/num2bin.csv
-	    if [[ "${verbose}" = "TRUE" ]]
+	    if [[ "${verbosemode}" = "TRUE" ]]
 	    then
 	      echo "Found ${hashshortname}"
 	    fi

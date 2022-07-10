@@ -21,6 +21,14 @@ then
   source func.insufficient
 
   function put_backr {
+
+    local cryptoID
+    local i
+    local backrhash
+    local backrID
+    local p_backrID
+    local f_backrID
+
     [[ $# -lt 1 ]] && insufficient 5 $@
     cryptoID="$1"
 

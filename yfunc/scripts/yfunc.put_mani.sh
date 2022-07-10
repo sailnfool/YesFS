@@ -21,6 +21,14 @@ then
   source func.insufficient
 
   function put_mani {
+
+    local cryptoID
+    local i
+    local manihash
+    local maniID
+    local p_maniID
+    local f_maniID
+
     [[ $# -lt 1 ]] && insufficient 5 $@
     cryptoID="$1"
 

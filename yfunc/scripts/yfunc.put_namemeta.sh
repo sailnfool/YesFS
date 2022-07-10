@@ -21,6 +21,14 @@ then
   source func.insufficient
 
   function put_namemeta {
+
+    local cryptoID
+    local i
+    local namemetahash
+    local mamemetID
+    local p_namemetaID
+    local f_namemetaID
+
     [[ $# -lt 1 ]] && insufficient 5 $@
     cryptoID="$1"
 
