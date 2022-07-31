@@ -117,19 +117,20 @@ fi
 # These are the pieces of information that come from stat
 # to add to the Manifest.  See man 1 stat
 ####################
-manifest[1]="ACCESS\t%a\n"
-manifest[2]="DEVICE\t%D\n"
-manifest[3]="FILETYPE\t%F\n"
-manifest[4]="GID\t%g\n"
-manifest[5]="GNAME\t%G\n"
-manifest[6]="BYTESIZE\t%s\n"
-manifest[7]="UID\t%u\n"
-manifest[8]="UNAME\t%U\n"
-manifest[9]="LASTACCESS\t%x\n"
-manifest[10]="LASTMODIFIED\t%y\n"
-manifest[11]="LASTCHANGE\t%z\n"
+manifest[0]="ACCESS\t%a\n"
+manifest[1]="DEVICE\t%D\n"
+manifest[2]="FILETYPE\t%F\n"
+manifest[3]="GID\t%g\n"
+manifest[4]="GNAME\t%G\n"
+manifest[5]="BYTESIZE\t%s\n"
+manifest[6]="UID\t%u\n"
+manifest[7]="UNAME\t%U\n"
+manifest[8]="LASTACCESS\t%x\n"
+manifest[9]="LASTMODIFIED\t%y\n"
+manifest[10]="LASTCHANGE\t%z\n"
 manifestfmt=""
-for i in { 1 11 }
+#for i in {1..11}
+for ((i=0;i<${#manifest};i++))
 do
 	manifestfmt="${manifestfmt}${manifest[$i]}"
 done

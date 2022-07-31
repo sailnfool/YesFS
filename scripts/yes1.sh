@@ -195,8 +195,10 @@ else
 	meta_accessid[0]="PREVIOUS_ID\t0"
 	meta_accessid[1]="TIME\t${timestamp}"
 	meta_accessid[2]="USERID\t$(uid -u)"
+	meta_accessid[3]="GROUPID\t$(uid -g)"
 fi
-for i in { 0 3 }
+#for i in {0..3}
+for ((i=0;i<${#meta_accessid};i++))
 do
 	echo -e ${meta_accessid[$i]} >> ${METAACESSID}
 done
