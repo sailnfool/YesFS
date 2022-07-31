@@ -118,7 +118,7 @@ manifest[9]="LASTACCESS\t%x\n"
 manifest[10]="LASTMODIFIED\t%y\n"
 manifest[11]="LASTCHANGE\t%z\n"
 manifestfmt=""
-for i in $(seq 1 11)
+for i in { 1 11 }
 do
 	manifestfmt="${manifestfmt}${manifest[$i]}"
 done

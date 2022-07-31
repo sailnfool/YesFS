@@ -196,7 +196,7 @@ else
 	meta_accessid[1]="TIME\t${timestamp}"
 	meta_accessid[2]="USERID\t$(uid -u)"
 fi
-for i in $(seq 0 3)
+for i in { 0 3 }
 do
 	echo -e ${meta_accessid[$i]} >> ${METAACESSID}
 done

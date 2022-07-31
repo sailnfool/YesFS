@@ -113,7 +113,7 @@ manifest[9]="LASTACCESS\t%x\n"
 manifest[10]="LASTMODIFIED\t%y\n"
 manifest[11]="LASTCHANGE\t%z\n"
 manifestfmt=""
-for i in $(seq 1 11)
+for i in { 1 11 }
 do
 	manifestfmt="${manifestfmt}${manifest[$i]}"
 done
@@ -218,7 +218,7 @@ do
 			meta_accessid[2]="USERID\t$(uid -u)"
 			meta_accessid[3]="GROUPID\t$(uid -g)"
 		fi
-		for i in $(seq 0 3)
+		for i in { 0 3 }
 		do
 			echo -e ${meta_accessid[$i]} >> ${METAACESSID}
 		done

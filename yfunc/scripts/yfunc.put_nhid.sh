@@ -85,7 +85,7 @@ then
     cp ${filename} ${f_chid}
     MANI["hash0"]="${chid}"
     MANI["off0"]=0
-    for i in $(seq 1 7)
+    for i in { 1 7 }
     do
       MANI["hash${i}"]=0
       MANI["off${i}"]=0

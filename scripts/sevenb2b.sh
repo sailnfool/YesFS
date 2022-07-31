@@ -186,7 +186,7 @@ do
 		meta_accessid[2]="USERID\t$(uid -u)"
 		meta_accessid[3]="GROUPID\t$(uid -g)"
 	fi
-	for i in $(seq 0 3)
+	for i in { 0 3 }
 	do
 		echo -e ${meta_accessid[$i]} >> ${METAACESSID}
 	done
