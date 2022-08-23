@@ -9,3 +9,11 @@ yfunc:
 	cd yfunc
 	make uninstall linstall clean
 	cd ..
+test:
+	cd yfunc/tests
+	make
+	cd ../..
+	cd tests
+	make
+	cd ..
+
