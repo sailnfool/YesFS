@@ -13,4 +13,7 @@ clean:
 	cd scripts
 	make clean
 	cd ..
-
+test:
+	cd tests
+	make
+	cd ..

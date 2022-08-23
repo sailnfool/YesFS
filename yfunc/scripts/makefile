@@ -4,40 +4,36 @@ LPREFIX?=$(HOME)/.local
 .sh:
 	@rm -f $@
 	cp $< $@
-LINSTALL = yfunc.create_canonical \
-		yfunc.maketop \
-	  yfunc.hashdirpath \
-		yfunc.put_backr\
-		yfunc.put_chunk \
-		yfunc.put_first_backref \
-		yfunc.put_mani \
-		yfunc.put_namemeta \
-		yfunc.put_nhid \
-	  yfunc.global
+LINSTALL = yfunc.global \
+	yfunc.maketop
+# 	yfunc.create_canonical \
+# 	yfunc.hashdirpath \
+# 	yfunc.put_backr\
+# 	yfunc.put_chunk \
+# 	yfunc.put_first_backref \
+# 	yfunc.put_mani \
+# 	yfunc.put_namemeta \
+# 	yfunc.put_nhid \
 
 
 EXECDIR := $(PREFIX)/bin
 LEXECDIR := $(LPREFIX)/bin
 
-.PHONY: clean linstall uninstall all
+#.PHONY: clean linstall uninstall all
 all: $(LINSTALL)
 	make uninstall linstall
 
-# install: $(INSTALL)
-# 	mkdir -p $(EXECDIR)
-# 	install -o $(USER) -C $? $(EXECDIR)
-# 	rm -f $?
 linstall: $(LINSTALL)
 	mkdir -p $(LEXECDIR)
 	install -o $(USER) -c $? $(LEXECDIR)
 	rm -f $?
-clean: 
+clean:
 	@for execfile in $(LINSTALL); do \
 		echo rm -f $$execfile; \
 		rm -f $$execfile; \
 	done
 
-uninstall: 
+uninstall:
 	@for execfile in $(LINSTALL); do \
 		echo rm -f $(EXECDIR)/$$execfile; \
 		rm -f $(EXECDIR)/$$execfile; \
