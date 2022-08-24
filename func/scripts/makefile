@@ -5,13 +5,12 @@ LPREFIX?=$(HOME)/.local
 	@rm -f $@
 	cp $< $@
 LINSTALL = yfunc.create_canonical \
-		yfunc.create_spec_backref \
-		yfunc.maketop \
-	  yfunc.hashdirpath \
-		yfunc.create_spec_backref \
-		yfunc.put_first_backref \
-		yfunc.put_nhid \
-	  yfunc.global
+	yfunc.create_spec_backref \
+	yfunc.maketop \
+	yfunc.hashdirpath \
+	yfunc.create_spec_backref \
+	yfunc.put_first_backref \
+	yfunc.put_nhid 
 
 
 EXECDIR := $(PREFIX)/bin
